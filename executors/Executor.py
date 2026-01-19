@@ -25,12 +25,6 @@ class Executor(ABC):
     def validate(self, data, data_for_plotting):
         pass # TODO: implement validation logic
 
-    def save_params(self):
-        pass # TODO: implement parameter saving logic
-
-    def save_result(self):
-        pass # TODO: implement result saving logic
-
     @abstractmethod
     def select_initial_params(self):
         pass
