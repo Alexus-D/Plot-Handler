@@ -22,6 +22,11 @@ class Plotter(ABC):
         self.plot_data = new_data
         self.redraw()
 
+    def save_figure(self):
+        if self.figure is None:
+            raise ValueError("No plot has been created to save.")
+        self.figure.savefig(self.file_path, dpi=self.dpi)
+
     @abstractmethod
     def create_figure(self) -> Figure:
         pass
@@ -30,8 +35,7 @@ class Plotter(ABC):
     def redraw(self):
         pass
 
-    def save_figure(self):
-        if self.figure is None:
-            raise ValueError("No plot has been created to save.")
-        self.figure.savefig(self.file_path, dpi=self.dpi)
+    @abstractmethod
+    def get_axis_for_marker(self) -> any:
+        pass
     

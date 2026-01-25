@@ -32,3 +32,8 @@ class PContour(Plotter):
             raise ValueError("No plot has been created to redraw.")
         plt.clf()
         self.create_figure()
+
+    def get_axis_for_marker(self):
+        if self.figure is None:
+            raise ValueError("No plot has been created to get axis from.")
+        return self.figure.axes[0]

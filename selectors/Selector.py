@@ -10,20 +10,19 @@ from markers import Marker
 class Selector(ABC):
     def __init__(self,
                  stage_name: str,
-                 plotter: Plotter,
-                 markers: dict(Marker),
+                 plot_data: dict,
                  buttons: list((str, str)),
                  clear_button: bool = True,
                  save_button: bool = True):
-        if plotter is None:
-            raise ValueError("plotter cannot be None")
+        if plot_data is None:
+            raise ValueError("plot_data cannot be None")
         if buttons is None:
             raise ValueError("buttons cannot be None")
         
         self.stage_name = stage_name
-        self.plotter = plotter
+        self.plotter = self._create_plotter(plot_data)
         self.figure = self.plotter.get_figure()
-        self.markers = markers
+        self.markers = self._create_markers(self.plotter)
 
         self.buttons = None
         self._create_buttons(buttons, clear_button, save_button)
@@ -88,4 +87,12 @@ class Selector(ABC):
 
     @abstractmethod
     def mouse_on_click(self, event):
+        pass
+
+    @abstractmethod
+    def _create_plotter(self, plot_data: dict) -> Plotter:
+        pass
+
+    @abstractmethod
+    def _create_markers(self, plotter: Plotter) -> dict(Marker):
         pass
