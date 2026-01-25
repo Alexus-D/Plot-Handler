@@ -1,6 +1,6 @@
 from plotters import Plotter
 
-from ui_selectors import Selector
+from ..ui_selectors.Selector import Selector
 
 
 class Validator(Selector):
@@ -26,8 +26,8 @@ class Validator(Selector):
 	def mouse_on_click(self, event):
 		return
 	
-	def _create_plotter(self, plot_data: dict) -> Plotter:
-		raise NotImplementedError("_create_plotter must be implemented in Validator subclass")
-	
-	def _create_markers(self, plotter: Plotter):
-		return {}
+    def _create_plotter(self, plot_data: dict) -> Plotter:
+        raise NotImplementedError("_create_plotter must be implemented in Validator subclass")
+
+    def _create_markers(self, plotter: Plotter):
+        return {}
