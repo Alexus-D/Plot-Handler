@@ -19,13 +19,13 @@ class PContour(Plotter):
 
         self.figure, ax = plt.subplots()
         contour = ax.contourf(X, Y, Z, cmap='viridis')
-        plt.colorbar(contour)
+        cbar = plt.colorbar(contour)
+        cbar.set_label(self.plot_data.get("zlabel", "Z-axis"))
         ax.set_title(self.plot_data.get("title", "Contour Plot"))
         ax.set_xlabel(self.plot_data.get("xlabel", "X-axis"))
         ax.set_ylabel(self.plot_data.get("ylabel", "Y-axis"))
-        ax.set_zlabel(self.plot_data.get("zlabel", "Z-axis"))
     
-    def redraw_plot(self):
+    def redraw(self):
         if self.figure is None:
             raise ValueError("No plot has been created to redraw.")
         plt.clf()
