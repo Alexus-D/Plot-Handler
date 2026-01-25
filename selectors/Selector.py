@@ -4,42 +4,67 @@ import pickle
 
 from matplotlib.widgets import Button
 
-from ..plotters.Plotter import Plotter
+from plotters import Plotter
+from markers import Marker
 
 class Selector(ABC):
     def __init__(self,
                  stage_name: str,
-                 plot_data: dict = None,
-                 buttons: list = None):
-        if plot_data is None:
-            raise ValueError("plot_data cannot be None")
+                 plotter: Plotter,
+                 markers: dict(Marker),
+                 buttons: list((str, str)),
+                 clear_button: bool = True,
+                 save_button: bool = True):
+        if plotter is None:
+            raise ValueError("plotter cannot be None")
         if buttons is None:
             raise ValueError("buttons cannot be None")
         
         self.stage_name = stage_name
-        self.plotter = Plotter(plot_data)
+        self.plotter = plotter
         self.figure = self.plotter.get_figure()
-        self.button_params = buttons
-        self.modes = [btn[0] for btn in self.button_params]
+        self.markers = markers
 
         self.buttons = None
-        self._create_buttons()
+        self._create_buttons(buttons, clear_button, save_button)
+        self.pressed_button = []
 
+        self.modes = [btn[0] for btn in buttons]
         self.mode = None
-        self.click_funks = self.set_click_funks()
 
         self.params = {}
 
-        self.mplot_cid = self.figure.canvas.mpl_connect('button_press_event', self.on_clicked)
+        self.mplot_cid = self.figure.canvas.mpl_connect('button_press_event', self.mouse_on_click)
+
+    def get_params(self) -> dict:
+        return self.params
     
-    def _create_buttons(self):
+    def clear_params(self):
+        self.params = {}
+        self.mode = None
+        for marker in self.markers.values():
+            marker.redraw()
+    
+    def save_params(self):
+        if len(self.params) == 0:
+            raise ValueError("No parameters to save")
+        
+        with open(f"{self.stage_name}_selector_params.pkl", "wb") as f:
+            pickle.dump(self.params, f)
+    
+    def _create_buttons(self, buttons, clear_button, save_button):
         button_width = 0.15
         button_height = 0.04
         button_left = 0.02
         button_spacing = 0.06
         button_bottom = 0.15
 
-        for mode, label in self.button_params:
+        if clear_button:
+            buttons.insert(0, ('clear', 'Clear'))
+        if save_button:
+            buttons.insert(1, ('save', 'Save'))
+
+        for mode, label in buttons:
             ax_button = self.figure.add_axes([button_left, button_bottom, button_width, button_height])
             button = Button(ax_button, label)
             button.on_clicked(lambda event, m=mode: self._set_mode(m))
@@ -51,39 +76,16 @@ class Selector(ABC):
     def _set_mode(self, mode):
         if mode not in self.modes:
             raise ValueError(f"Mode {mode} is not recognized")
+        if mode == 'clear':
+            self.clear_params()
+            self.mode = None
+            return
+        elif mode == 'save':
+            self.save_params()
+            self.mode = None
+            return
         self.mode = mode
 
-    def on_clicked(self, event):
-        if self.click_funks is None:
-            raise ValueError("Click functions are not set")
-        if self.mode not in self.modes:
-            return
-        
-        click_funk = self.click_funks[self.mode]
-        self.params, reset_mode = click_funk(event, self.params)
-        if reset_mode:
-            self.mode = None
-        self.redraw()
-    
     @abstractmethod
-    def set_click_funks(self):
+    def mouse_on_click(self, event):
         pass
-
-    @abstractmethod
-    def redraw(self):
-        pass
-
-    def get_params(self) -> dict:
-        return self.params
-    
-    def clear_params(self):
-        self.params = {}
-        self.mode = None
-        self.redraw()
-    
-    def save_params(self):
-        if len(self.params) == 0:
-            raise ValueError("No parameters to save")
-        
-        with open(f"{self.stage_name}_selector_params.pkl", "wb") as f:
-            pickle.dump(self.params, f)

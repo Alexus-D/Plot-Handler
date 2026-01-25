@@ -24,6 +24,8 @@ class PContour(Plotter):
         ax.set_title(self.plot_data.get("title", "Contour Plot"))
         ax.set_xlabel(self.plot_data.get("xlabel", "X-axis"))
         ax.set_ylabel(self.plot_data.get("ylabel", "Y-axis"))
+
+        return self.figure
     
     def redraw(self):
         if self.figure is None:

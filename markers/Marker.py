@@ -3,10 +3,10 @@ from abc import abstractmethod
 
 
 class Marker(ABC):
-    def __init__(self, figure):
-        if figure is None:
-            raise ValueError("figure cannot be None")
-        self.figure = figure
+    def __init__(self, axes):
+        if axes is None:
+            raise ValueError("axes cannot be None")
+        self.axes = axes
         self.ticks = []
     
     def delete_ticks(self, indices=None):
@@ -36,4 +36,7 @@ class Marker(ABC):
         pass
 
     def redraw(self):
-        self.figure.canvas.draw_idle()
+        if hasattr(self.axes, "figure") and hasattr(self.axes.figure, "canvas"):
+            self.axes.figure.canvas.draw_idle()
+            return
+        raise ValueError("axes does not have a figure canvas to redraw")
