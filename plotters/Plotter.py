@@ -1,16 +1,19 @@
 from abc import ABC
 from abc import abstractmethod
+from typing import Optional
+
+from matplotlib.figure import Figure
 
 class Plotter(ABC):
-    def __init__(self, plot_data, figure=None):
+    def __init__(self, plot_data, figure: Optional[Figure] = None):
         if plot_data is None:
             raise ValueError("plot_data cannot be None")
         self.plot_data = plot_data
-        self.figure = figure or self.create_figure()
+        self.figure: Figure = figure or self.create_figure()
         self.dpi = plot_data.get("dpi", 300)
         self.file_path = plot_data.get("file_path", "plot.png")
     
-    def get_figure(self):
+    def get_figure(self) -> Figure:
         return self.figure
     
     def change_data(self, new_data):
@@ -20,7 +23,7 @@ class Plotter(ABC):
         self.redraw()
 
     @abstractmethod
-    def create_figure(self):
+    def create_figure(self) -> Figure:
         pass
 
     @abstractmethod

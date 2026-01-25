@@ -5,7 +5,7 @@ class Validator(Selector):
 	def __init__(self,
 				 stage_name: str,
 				 plotter,
-				 markers = {},
+				 markers,
 				 clear_button: bool = False,
 				 save_button: bool = False):
 		buttons = [("accept", "Accept"), ("deny", "Deny")]
