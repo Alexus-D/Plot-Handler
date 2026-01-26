@@ -27,9 +27,10 @@ class EFilter(Executor):
         selector = SNPoints(self.stage_name, self.data, num_points=2)
         plt.show()
         selected_params = selector.get_params()
+        points = np.array(selected_params["select_points"])
         ranges = {}
-        ranges["x_range"] = (np.min(selected_params[:, 0]), np.max(selected_params[:, 0]))
-        ranges["y_range"] = (np.min(selected_params[:, 1]), np.max(selected_params[:, 1]))
+        ranges["x_range"] = (np.min(points[:, 0]), np.max(points[:, 0]))
+        ranges["y_range"] = (np.min(points[:, 1]), np.max(points[:, 1]))
         return ranges
 
     def prepare_for_visualization(self, result):
