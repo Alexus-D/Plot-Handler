@@ -11,7 +11,7 @@ class Selector(ABC):
     def __init__(self,
                  stage_name: str,
                  plot_data: dict,
-                 buttons: list((str, str)),
+                 buttons: list[tuple[str, str]],
                  clear_button: bool = True,
                  save_button: bool = True):
         if plot_data is None:
@@ -94,5 +94,5 @@ class Selector(ABC):
         pass
 
     @abstractmethod
-    def _create_markers(self, plotter: Plotter) -> dict(Marker):
+    def _create_markers(self, plotter: Plotter) -> dict:
         pass

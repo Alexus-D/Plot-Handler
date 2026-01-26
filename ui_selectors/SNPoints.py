@@ -9,7 +9,7 @@ class SNPoints(Selector):
                  stage_name: str,
                  plot_data: dict,
                  num_points,
-                 buttons: list((str, str)) = None,
+                 buttons: list[tuple[str, str]] = None,
                  clear_button: bool = True,
                  save_button: bool = True):
         self.num_points = num_points
