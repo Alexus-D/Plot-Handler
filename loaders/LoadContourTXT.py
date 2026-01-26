@@ -18,7 +18,7 @@ class LoadContourTXT(Loader):
     def load_data(self) -> dict:
         if self.data_path is None:
             raise ValueError("data_path is not set.")
-        data = np.loadtxt(self.data_path, delimiter=',')
+        data = np.loadtxt(self.data_path, delimiter='\t')
         y = data[0, 1:]
         x = data[1:, 0]
         z = data[1:, 1:]
