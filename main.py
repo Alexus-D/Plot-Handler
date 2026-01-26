@@ -1,10 +1,10 @@
 import os
 
-import loaders, executors
+import loaders
+import interruptible_executors
 
 from sugar import make_step, make_time_directory
 
-# Проверь имя файла, в твоей папке data/ лежат другие файлы (например 18_12_2025_CoherentS12.txt)
 data_path = "data/CoherentCoupling_S12.txt" 
 result_path = os.path.join(make_time_directory("data"), "filtered_result.txt")
 
@@ -22,6 +22,4 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
-result = make_step(data, executors.EFilter, "Filter Step")
-
-print("Result:", result)
+result = make_step(data, interruptible_executors.ETestInterruptible, "Test Interruptible Step")
