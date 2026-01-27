@@ -21,13 +21,14 @@ def filter_data(data, ranges):
         x_min, x_max = ranges['x_range']
         x_mask = (x >= x_min) & (x <= x_max)
         x = x[x_mask]
-        z = z[:, x_mask]
+        z = z[x_mask, :]
 
     if 'y_range' in ranges:
         y_min, y_max = ranges['y_range']
         y_mask = (y >= y_min) & (y <= y_max)
         y = y[y_mask]
-        z = z[y_mask, :]
+        z = z[:, y_mask]
 
     filtered_data = data.copy()
     filtered_data.update({'x': x, 'y': y, 'z': z})
+    return filtered_data

@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from plotters import Plotter
 
 from ui_selectors import Selector
@@ -16,10 +18,12 @@ class Validator(Selector):
 		if mode == "accept":
 			self.params = {"Validation": True}
 			self.mode = None
+			plt.close(self.figure)
 			return
 		if mode == "deny":
 			self.params = {"Validation": False}
 			self.mode = None
+			plt.close(self.figure)
 			return
 		raise ValueError(f"Mode {mode} is not recognized")
 

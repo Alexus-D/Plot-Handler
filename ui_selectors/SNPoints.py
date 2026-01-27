@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from .Selector import Selector
 
 from plotters import PContour
@@ -27,6 +29,9 @@ class SNPoints(Selector):
             self.params["select_points"].append((event.xdata, event.ydata))
             self.markers["MPoints"].set_ticks(self.params["select_points"])
             self.markers["MPoints"].redraw()
+            if len(self.params["select_points"]) == self.num_points:
+                self.mode = None
+                plt.close()
     
     def _create_plotter(self, plot_data: dict):
         return PContour(plot_data)

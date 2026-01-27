@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 import pickle
+import matplotlib.pyplot as plt
 
 from matplotlib.widgets import Button
 

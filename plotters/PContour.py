@@ -15,7 +15,7 @@ class PContour(Plotter):
             raise ValueError("plot_data must contain 'x', 'y', and 'z' keys.")
 
         X, Y = np.meshgrid(x, y)
-        Z = np.array(z)
+        Z = np.array(z).transpose()
 
         self.figure, ax = plt.subplots()
         contour = ax.contourf(X, Y, Z, cmap='viridis')
