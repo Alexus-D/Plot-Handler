@@ -31,3 +31,5 @@ def filter_data(data, ranges):
 
     filtered_data = data.copy()
     filtered_data.update({'x': x, 'y': y, 'z': z})
+
+    return filtered_data

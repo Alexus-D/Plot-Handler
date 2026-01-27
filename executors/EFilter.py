@@ -13,14 +13,14 @@ class EFilter(Executor):
     def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
         super().__init__(data, stage_name, initial_params)
 
-    def validate(self, data_for_visualization):
+    def validate(self, data_for_visualization) -> bool:
         validator = VContourf(self.stage_name, data_for_visualization)
         plt.show()
-        return validator.get_params().get("Validation")
+        return bool(validator.get_params().get("Validation", False))
 
 
-    def execute(self, initial_params):
-        filtered_data = filter_data(self.data, initial_params)
+    def execute(self):
+        filtered_data = filter_data(self.data, self.initial_params)
         return filtered_data
 
     def select_initial_params(self):
