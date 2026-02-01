@@ -70,7 +70,7 @@ class InterruptibleExecutor(Executor):
         self.select_correcting_params()
 
     def prepare_for_visualization(self):
-        pass
+        return
 
     @abstractmethod
     def _update_line(self, points)  -> None:
