@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 
 from matplotlib.backend_bases import MouseEvent
+import matplotlib.pyplot as plt
 
 import config_physics
 

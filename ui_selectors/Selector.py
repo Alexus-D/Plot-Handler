@@ -1,6 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
 import pickle
+from typing import Dict
 import matplotlib.pyplot as plt
 
 from matplotlib.widgets import Button
@@ -95,5 +96,5 @@ class Selector(ABC):
         pass
 
     @abstractmethod
-    def _create_markers(self, plotter: Plotter) -> dict(Marker):
+    def _create_markers(self, plotter: Plotter) -> Dict[str, Marker]:
         pass
