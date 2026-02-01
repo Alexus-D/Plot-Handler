@@ -1,0 +1,1 @@
+PEAK_TYPE = 'maximum'  # 'maximum' или 'minimum'
