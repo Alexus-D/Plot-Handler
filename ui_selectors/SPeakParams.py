@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple
 
 from matplotlib.backend_bases import MouseEvent
+import matplotlib.pyplot as plt
 
 import config_physics
 
@@ -24,6 +25,7 @@ class SPeakParams(Selector):
 				("select_plateau", "Select Plateau"),
 				("set_max", "Peak: Maximum"),
 				("set_min", "Peak: Minimum"),
+				("finish", "Finish"),
 			]
 
 		super().__init__(stage_name, plot_data, buttons, clear_button, save_button)
@@ -33,10 +35,16 @@ class SPeakParams(Selector):
 		self._plateau_point = None
 		self._peak_type_locked = False
 		self._highlight_points = list(plot_data.get("highlight_points", []))
+		self.finished = False
 		if self._highlight_points:
 			self._redraw_markers()
 
 	def _set_mode(self, mode):
+		if mode == "finish":
+			self.mode = None
+			self.finished = True
+			plt.close(self.figure)
+			return
 		if mode == "set_max":
 			self.params["peak_type"] = "maximum"
 			self._peak_type_locked = True

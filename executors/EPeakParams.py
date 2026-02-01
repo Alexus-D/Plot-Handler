@@ -50,7 +50,9 @@ class EPeakParams(Executor):
 			return
 
 		selector = SPeakParams(self.stage_name, self.data)
-		plt.show()
+		plt.show(block=False)
+		while not selector.finished:
+			plt.pause(0.1)
 		params = selector.get_params()
 		self.initial_params = dict(params)
 

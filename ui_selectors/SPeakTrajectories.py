@@ -24,11 +24,13 @@ class SPeakTrajectories(Selector):
 		super().__init__(stage_name, plot_data, buttons, clear_button, save_button)
 		self._pending_points: List[Tuple[float, float]] = []
 		self.params["trajectories"] = []
+		self.finished = False
 
 	def _set_mode(self, mode):
 		if mode == "finish":
+			self._finalize_trajectories()
 			self.mode = None
-			plt.close(self.figure)
+			self.finished = True
 			return
 		super()._set_mode(mode)
 
@@ -66,3 +68,22 @@ class SPeakTrajectories(Selector):
 			points.extend([start, end])
 		points.extend(self._pending_points)
 		marker.update_ticks(points)
+
+	def _finalize_trajectories(self):
+		self._draw_trajectories()
+		self._clear_markers()
+
+	def _draw_trajectories(self):
+		axis = self.plotter.get_axis_for_marker()
+		for start, end in self.params.get("trajectories", []):
+			xs = [start[0], end[0]]
+			ys = [start[1], end[1]]
+			axis.plot(xs, ys, color="red", linewidth=1)
+		axis.figure.canvas.draw_idle()
+
+	def _clear_markers(self):
+		marker = self.markers.get("MPoints")
+		if marker is None:
+			return
+		marker.delete_ticks()
+		marker.redraw()
