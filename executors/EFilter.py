@@ -13,15 +13,15 @@ class EFilter(Executor):
     def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
         super().__init__(data, stage_name, initial_params)
 
-    def validate(self, data_for_visualization):
-        validator = VContourf(self.stage_name, data_for_visualization)
+    def validate(self):
+        validator = VContourf(self.stage_name, self.data_for_visualization)
         plt.show()
         return validator.get_params().get("Validation")
 
 
-    def execute(self, initial_params):
-        filtered_data = filter_data(self.data, initial_params)
-        return filtered_data
+    def execute(self):
+        filtered_data = filter_data(self.data, self.initial_params)
+        self.result = filtered_data
 
     def select_initial_params(self):
         selector = SNPoints(self.stage_name, self.data, num_points=2)
@@ -31,7 +31,7 @@ class EFilter(Executor):
         ranges = {}
         ranges["x_range"] = (np.min(selected_params[:, 0]), np.max(selected_params[:, 0]))
         ranges["y_range"] = (np.min(selected_params[:, 1]), np.max(selected_params[:, 1]))
-        return ranges
+        self.initial_params = ranges
 
-    def prepare_for_visualization(self, result):
-        return result
+    def prepare_for_visualization(self):
+        self.data_for_visualization = self.result

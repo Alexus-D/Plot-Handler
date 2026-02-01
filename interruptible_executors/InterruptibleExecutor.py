@@ -62,6 +62,15 @@ class InterruptibleExecutor(Executor):
 
         btn_interrupt.on_clicked(self.on_interrupt)
         return btn_interrupt
+    
+    def validate(self):
+        return True
+    
+    def select_initial_params(self):
+        self.select_correcting_params()
+
+    def prepare_for_visualization(self):
+        pass
 
     @abstractmethod
     def _update_line(self, points)  -> None:
