@@ -32,6 +32,9 @@ class SPeakParams(Selector):
 		self._width_points = []
 		self._plateau_point = None
 		self._peak_type_locked = False
+		self._highlight_points = list(plot_data.get("highlight_points", []))
+		if self._highlight_points:
+			self._redraw_markers()
 
 	def _set_mode(self, mode):
 		if mode == "set_max":
@@ -95,6 +98,7 @@ class SPeakParams(Selector):
 		if marker is None:
 			return
 		points = []
+		points.extend(self._highlight_points)
 		if self._peak_point is not None:
 			points.append(self._peak_point)
 		points.extend(self._width_points)

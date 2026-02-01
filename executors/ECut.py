@@ -43,6 +43,8 @@ class ECut(Executor):
 		}
 
 	def select_initial_params(self):
+		if self.initial_params.get("cut_value") is not None:
+			return
 		axis = self.axis
 
 		label = "Select X cut" if axis == "x" else "Select Y cut"

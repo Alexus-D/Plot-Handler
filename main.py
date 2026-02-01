@@ -1,6 +1,6 @@
 import os
 
-import loaders, executors
+import loaders, executors, interruptible_executors
 
 from sugar import make_step, make_time_directory
 
@@ -25,8 +25,6 @@ data = loader.load_data()
 
 result = make_step(data, executors.EFilter, "Filter Step")
 
-result = make_step(result, executors.IEddd, "next_step")
-
-loader.save_as_pickle(result)
+result = make_step(result, interruptible_executors.IEPeakWatcher, "Peak Watcher")
 
 

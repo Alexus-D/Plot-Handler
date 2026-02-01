@@ -18,7 +18,7 @@ class PContour(Plotter):
         Z = np.array(z).transpose()
 
         self.figure, ax = plt.subplots()
-        contour = ax.contourf(X, Y, Z, cmap='viridis')
+        contour = ax.contourf(X, Y, Z, cmap='viridis', levels=50)
         cbar = plt.colorbar(contour)
         cbar.set_label(self.plot_data.get("zlabel", "Z-axis"))
         ax.set_title(self.plot_data.get("title", "Contour Plot"))

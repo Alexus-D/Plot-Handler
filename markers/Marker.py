@@ -36,9 +36,17 @@ class Marker(ABC):
         pass
 
     def update_ticks(self, ticks, clear: bool = True):
+        xlim = None
+        ylim = None
+        if hasattr(self.axes, "get_xlim") and hasattr(self.axes, "get_ylim"):
+            xlim = self.axes.get_xlim()
+            ylim = self.axes.get_ylim()
         if clear:
             self.delete_ticks()
         self.set_ticks(ticks)
+        if xlim is not None and ylim is not None:
+            self.axes.set_xlim(xlim)
+            self.axes.set_ylim(ylim)
         self.redraw()
 
     def redraw(self):
