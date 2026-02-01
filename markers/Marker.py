@@ -35,6 +35,12 @@ class Marker(ABC):
     def set_ticks(self, ticks):
         pass
 
+    def update_ticks(self, ticks, clear: bool = True):
+        if clear:
+            self.delete_ticks()
+        self.set_ticks(ticks)
+        self.redraw()
+
     def redraw(self):
         if hasattr(self.axes, "figure") and hasattr(self.axes.figure, "canvas"):
             self.axes.figure.canvas.draw_idle()

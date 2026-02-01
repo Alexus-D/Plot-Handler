@@ -21,8 +21,7 @@ class SFreq(Selector):
     def mouse_on_click(self, event: MouseEvent) -> None:
         if self.mode == "select_freq":
             self.params.update({'select_freq': event.ydata})
-            self.markers["MPoints"].set_ticks([(event.xdata, event.ydata)])
-            self.markers["MPoints"].redraw()
+            self.markers["MPoints"].update_ticks([(event.xdata, event.ydata)])
         
     def _create_plotter(self, plot_data: dict) -> Plotter:
         return PContour(plot_data)

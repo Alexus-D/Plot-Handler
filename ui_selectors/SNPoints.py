@@ -27,8 +27,7 @@ class SNPoints(Selector):
             if len(self.params["select_points"]) >= self.num_points:
                 return
             self.params["select_points"].append((event.xdata, event.ydata))
-            self.markers["MPoints"].set_ticks(self.params["select_points"])
-            self.markers["MPoints"].redraw()
+            self.markers["MPoints"].update_ticks(self.params["select_points"])
             if len(self.params["select_points"]) == self.num_points:
                 self.mode = None
                 plt.close()
