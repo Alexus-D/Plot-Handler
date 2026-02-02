@@ -5,7 +5,7 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_time_directory
 
 
-data_path = "data/DEN#3 bulk resonator.txt"
+data_path = "data/mease2026S21.txt"
 result_path = os.path.join(make_time_directory("data"), "filtered_result.txt")
 
 data_params = {
