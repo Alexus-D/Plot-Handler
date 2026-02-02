@@ -38,6 +38,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         1) Выбор траекторий с помощью ETrajectories
         2) Для каждой траектории: срез в начальной точке + выбор параметров пика
         """
+        print("[IEPeakWatcher] Старт: выбор начальных параметров")
         # 1. Выбор траекторий
         traj_executor = ETrajectories(self.data, "Select Trajectories")
         traj_executor.execute_with_validation()
@@ -52,6 +53,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         for i, (start, end) in enumerate(self.trajectories):
             start_field = start[0]
             start_freq = start[1]
+            print(f"[IEPeakWatcher] Траектория {i+1}: срез в поле {start_field}")
             
             # Делаем срез в начальной точке траектории
             cut_executor = ECut(
@@ -68,6 +70,7 @@ class IEPeakWatcher(InterruptibleExecutor):
             
             # Выбираем параметры пика на срезе
             peak_executor = EPeakParams(cut_data, f"Peak params for trajectory {i+1}")
+            print(f"[IEPeakWatcher] Траектория {i+1}: выбор параметров пика")
             peak_executor.execute_with_validation()
             peak_params = peak_executor.get_result()
             
@@ -75,6 +78,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         
         # Инициализируем структуру результата
         self.result = {"trajectories": []}
+        print("[IEPeakWatcher] Готово: начальные параметры выбраны")
 
     def _get_z_at_point(self, field, freq):
         """Получает значение Z в точке (field, freq)."""
@@ -91,6 +95,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         """
         Создаёт окно с 4 графиками: контурный + 3 графика параметров.
         """
+        print("[IEPeakWatcher] Инициализация окна визуализации")
         plt.ion()
         
         self.figure, self.axes = plt.subplots(2, 2, figsize=(14, 10))
@@ -150,6 +155,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         
         # Начальное обновление
         self._update_line(result)
+        print("[IEPeakWatcher] Окно визуализации готово")
 
     def _draw_contour(self, ax):
         """Рисует контурный график на указанной оси."""
@@ -187,8 +193,12 @@ class IEPeakWatcher(InterruptibleExecutor):
         """
         Основной цикл отслеживания пиков по всем траекториям.
         """
+        print("[IEPeakWatcher] Старт: отслеживание пиков")
+        print(f"[DEBUG] interrupted={self.interrupted}, correcting_params={bool(self.correcting_params)}")
         for traj_idx, (start, end) in enumerate(self.trajectories):
             self._current_traj_idx = traj_idx
+            print(f"[IEPeakWatcher] Траектория {traj_idx+1}: старт")
+            print(f"[DEBUG] Траектория {traj_idx+1}: interrupted={self.interrupted}")
             
             # Инициализируем структуру для траектории, если её нет
             if traj_idx >= len(self.result["trajectories"]):
@@ -205,18 +215,23 @@ class IEPeakWatcher(InterruptibleExecutor):
             
             # Получаем индексы полей для этой траектории
             self._field_indices = self._get_fields_range(start[0], end[0])
+            print(f"[IEPeakWatcher] Траектория {traj_idx+1}: шагов {len(self._field_indices)}")
             
             # Определяем, с какого индекса начинать
             if self._continue_from_idx is not None:
                 start_idx = self._continue_from_idx
+                print(f"[DEBUG] Продолжаем с индекса {start_idx}, сбрасываем _continue_from_idx")
                 self._continue_from_idx = None
             else:
                 start_idx = len(traj_data["fields"])
+                print(f"[DEBUG] Начинаем с индекса {start_idx} (текущая длина результатов)")
             
             # Получаем начальные параметры
             if self.correcting_params:
                 current_params = self.correcting_params.copy()
+                print(f"[DEBUG] Корректирующие параметры: {current_params}")
                 self.correcting_params = {}
+                print(f"[IEPeakWatcher] Траектория {traj_idx+1}: использую корректирующие параметры")
             elif start_idx > 0 and len(traj_data["freq"]) > 0:
                 # Используем последние найденные параметры
                 current_params = {
@@ -225,15 +240,19 @@ class IEPeakWatcher(InterruptibleExecutor):
                     "prominence": traj_data["prominence"][-1],
                     "peak_type": self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
                 }
+                print(f"[IEPeakWatcher] Траектория {traj_idx+1}: использую последние параметры")
             else:
                 current_params = self.initial_peak_params[traj_idx].copy()
+                print(f"[IEPeakWatcher] Траектория {traj_idx+1}: использую начальные параметры")
             
             # Цикл по полям
+            print(f"[DEBUG] Цикл по полям: start_idx={start_idx}, total_indices={len(self._field_indices)}")
             for i in range(start_idx, len(self._field_indices)):
                 field_idx = self._field_indices[i]
                 field = self.data["x"][field_idx]
                 freqs = self.data["y"]
                 s_values = self.data["z"][field_idx, :]
+                print(f"[IEPeakWatcher] Траектория {traj_idx+1}: поиск пика, i={i}, поле={field}")
                 
                 # Ищем пик
                 try:
@@ -247,6 +266,7 @@ class IEPeakWatcher(InterruptibleExecutor):
                 except Exception as e:
                     print(f"Peak finding failed at field {field}: {e}")
                     self.interrupted = True
+                    self.skip_delete_wrong_results = True
                     self._continue_from_idx = i
                     return self.result
                 
@@ -264,20 +284,25 @@ class IEPeakWatcher(InterruptibleExecutor):
                 current_params["prominence"] = peak["prominence"]
                 
                 # Обновляем визуализацию
+                print(f"[DEBUG] Обновление визуализации, текущих точек: {len(traj_data['fields'])}")
                 self._update_line(self.result)
                 
                 # Пауза 0.1 секунды
-                plt.pause(0.1)
+                plt.pause(0.001)
                 
                 # Проверяем прерывание
                 if self.interrupted:
+                    print(f"[IEPeakWatcher] Траектория {traj_idx+1}: прервано пользователем")
+                    print(f"[DEBUG] Прерывание: устанавливаем _continue_from_idx={i + 1}")
                     self._continue_from_idx = i + 1
                     return self.result
             
             # Конец траектории - валидация
             if not self._validate_trajectory_end():
+                print(f"[IEPeakWatcher] Траектория {traj_idx+1}: отклонена пользователем")
                 self.interrupted = True
                 return self.result
+            print(f"[IEPeakWatcher] Траектория {traj_idx+1}: подтверждена")
         
         return self.result
 
@@ -290,12 +315,14 @@ class IEPeakWatcher(InterruptibleExecutor):
         
         # Собираем все найденные точки из всех траекторий
         all_points = []
-        for traj_data in result.get("trajectories", []):
+        for idx, traj_data in enumerate(result.get("trajectories", [])):
             fields = traj_data.get("fields", [])
             freqs = traj_data.get("freq", [])
+            print(f"[DEBUG] _update_line: траектория {idx+1}, точек={len(fields)}")
             for f, freq in zip(fields, freqs):
                 all_points.append((f, freq))
         
+        print(f"[DEBUG] _update_line: всего точек для отображения={len(all_points)}")
         # Обновляем маркеры на контурном графике
         self.marker.update_ticks(all_points)
         
@@ -304,8 +331,11 @@ class IEPeakWatcher(InterruptibleExecutor):
         
         # Перерисовываем
         if self.figure is not None:
+            print(f"[DEBUG] Вызов draw_idle и flush_events")
             self.figure.canvas.draw_idle()
             self.figure.canvas.flush_events()
+        else:
+            print(f"[DEBUG] WARNING: self.figure is None!")
 
     def _update_param_plots(self, result):
         """Обновляет графики параметров (freq, magnitude, width)."""
@@ -332,13 +362,16 @@ class IEPeakWatcher(InterruptibleExecutor):
         Позволяет пользователю выбрать рамочкой неправильные маркеры 
         и удаляет соответствующие результаты.
         """
+        print("[IEPeakWatcher] Выделите рамкой точки для удаления")
         self._selected_rect = None
         self._deletion_confirmed = False
         
         def on_select(eclick, erelease):
+            print(f"[DEBUG IEPeakWatcher] RectangleSelector: выделена область")
             x1, x2 = sorted([eclick.xdata, erelease.xdata])
             y1, y2 = sorted([eclick.ydata, erelease.ydata])
             self._selected_rect = (x1, x2, y1, y2)
+            print(f"[DEBUG IEPeakWatcher] Область: x=[{x1:.2f}, {x2:.2f}], y=[{y1:.2f}, {y2:.2f}]")
         
         # Создаём RectangleSelector
         rect_selector = RectangleSelector(
@@ -353,13 +386,16 @@ class IEPeakWatcher(InterruptibleExecutor):
         btn_confirm = Button(ax_btn, 'Delete Selected')
         
         def on_confirm(event):
+            print("[DEBUG IEPeakWatcher] КНОПКА DELETE SELECTED НАЖАТА!")
             self._deletion_confirmed = True
         
         btn_confirm.on_clicked(on_confirm)
         
         # Ждём подтверждения
+        print("[DEBUG IEPeakWatcher] Ожидание нажатия Delete Selected...")
         while not self._deletion_confirmed:
             plt.pause(0.1)
+        print("[IEPeakWatcher] Удаление выбранных точек")
         
         # Удаляем точки, попавшие в рамку
         if self._selected_rect is not None:
@@ -375,6 +411,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         """
         Удаляет из результатов точки, попавшие в прямоугольник [x1,x2] x [y1,y2].
         """
+        print("[IEPeakWatcher] Удаляю точки в выделенной области")
         traj_data = self.result["trajectories"][self._current_traj_idx]
         
         fields = traj_data["fields"]
@@ -395,6 +432,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         # Запоминаем, с какого индекса продолжить
         if indices_to_remove:
             self._continue_from_idx = min(indices_to_remove)
+            print(f"[IEPeakWatcher] Продолжу с индекса {self._continue_from_idx}")
         
         # Обновляем визуализацию
         self._update_line(self.result)
@@ -404,6 +442,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         Позволяет пользователю выбрать новые параметры пика 
         для продолжения отслеживания с места ошибки.
         """
+        print("[IEPeakWatcher] Выбор корректирующих параметров")
         traj_data = self.result["trajectories"][self._current_traj_idx]
         
         # Определяем поле, с которого продолжить
@@ -433,6 +472,7 @@ class IEPeakWatcher(InterruptibleExecutor):
             axis="x",
             initial_params={"cut_value": continue_field}
         )
+        print(f"[IEPeakWatcher] Срез для корректировки, поле={continue_field}")
         cut_executor.execute()
         cut_data = cut_executor.get_result()
         
@@ -446,17 +486,32 @@ class IEPeakWatcher(InterruptibleExecutor):
             cut_data["highlight_points"] = [(last_freq, last_mag)]
         
         # Даём выбрать новые параметры
+        # НЕ выключаем интерактивный режим - это блокирует новое окно
+        print("[DEBUG] Создаём EPeakParams для выбора корректирующих параметров")
+        
         peak_executor = EPeakParams(cut_data, "Select correcting peak params")
+        print("[IEPeakWatcher] Выберите новые параметры пика")
+        print("[DEBUG] Вызываем execute_with_validation()")
         peak_executor.execute_with_validation()
+        print("[DEBUG] execute_with_validation() завершился")
+        
+        # Восстанавливаем видимость основного окна
+        if self.figure is not None:
+            print("[DEBUG] Восстанавливаем основное окно")
+            self.figure.canvas.draw_idle()
+            self.figure.canvas.flush_events()
         
         # Сохраняем скорректированные параметры
         self.correcting_params = peak_executor.get_result()
+        print("[IEPeakWatcher] Корректирующие параметры сохранены")
+        print(f"[DEBUG] Сохранённые параметры: {self.correcting_params}")
 
     def _validate_trajectory_end(self):
         """
         Показывает кнопки подтверждения в конце траектории.
         Возвращает True если пользователь подтвердил, False если отклонил.
         """
+        print("[IEPeakWatcher] Подтвердите или отклоните траекторию")
         self._trajectory_confirmed = None
         
         # Создаём кнопки Confirm и Reject
@@ -467,17 +522,21 @@ class IEPeakWatcher(InterruptibleExecutor):
         btn_reject = Button(ax_reject, 'Reject')
         
         def on_confirm(event):
+            print("[DEBUG IEPeakWatcher] КНОПКА CONFIRM ТРАЕКТОРИИ НАЖАТА!")
             self._trajectory_confirmed = True
         
         def on_reject(event):
+            print("[DEBUG IEPeakWatcher] КНОПКА REJECT ТРАЕКТОРИИ НАЖАТА!")
             self._trajectory_confirmed = False
         
         btn_confirm.on_clicked(on_confirm)
         btn_reject.on_clicked(on_reject)
         
         # Ждём нажатия
+        print("[DEBUG IEPeakWatcher] Ожидание нажатия Confirm/Reject...")
         while self._trajectory_confirmed is None:
             plt.pause(0.1)
+        print(f"[IEPeakWatcher] Решение по траектории получено: {self._trajectory_confirmed}")
         
         # Убираем кнопки
         ax_confirm.remove()
@@ -489,6 +548,7 @@ class IEPeakWatcher(InterruptibleExecutor):
 
     def _close_execution_plot(self):
         """Закрывает окно с графиками."""
+        print("[IEPeakWatcher] Закрытие окна визуализации")
         if self.figure is not None:
             plt.close(self.figure)
             self.figure = None

@@ -49,9 +49,27 @@ class EPeakParams(Executor):
 		if required.issubset(self.initial_params.keys()):
 			return
 
+		print("[DEBUG EPeakParams] Создание селектора SPeakParams")
 		selector = SPeakParams(self.stage_name, self.data)
-		plt.show()
+		
+		# Ждём, пока пользователь не нажмёт Done
+		print("[DEBUG EPeakParams] Ожидание нажатия кнопки Done")
+		while not selector.is_done():
+			if not plt.fignum_exists(selector.figure.number):
+				print("[DEBUG EPeakParams] Окно было закрыто вручную!")
+				break
+			plt.pause(0.1)
+		
+		print("[DEBUG EPeakParams] Выход из цикла ожидания")
+		
+		# Закрываем окно после выхода из цикла
+		if plt.fignum_exists(selector.figure.number):
+			print("[DEBUG EPeakParams] Закрываем окно селектора")
+			plt.close(selector.figure)
+		
+		print("[DEBUG EPeakParams] Получаем параметры")
 		params = selector.get_params()
+		print(f"[DEBUG EPeakParams] Получены параметры: {params}")
 		self.initial_params = dict(params)
 
 	def prepare_for_visualization(self):

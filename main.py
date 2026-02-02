@@ -23,8 +23,10 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
-result = make_step(data, executors.EFilter, "Filter Step")
+data = make_step(data, executors.EFilter, "Filter Step")
 
-result = make_step(result, interruptible_executors.IEPeakWatcher, "Peak Watcher")
+result = make_step(data, interruptible_executors.IEPeakWatcher, "Peak Watcher")
+
+data.update(result)
 
 

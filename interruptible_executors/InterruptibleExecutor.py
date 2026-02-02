@@ -12,6 +12,7 @@ class InterruptibleExecutor(Executor):
     def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
         super().__init__(data, stage_name, initial_params)
         self.interrupted = False
+        self.skip_delete_wrong_results = False
         
         self.plotter = None
         self.marker = None
@@ -21,19 +22,28 @@ class InterruptibleExecutor(Executor):
     def execute(self):
         self.remain_data = self.data.copy()
         self.interrupted = False
+        print("[DEBUG InterruptibleExecutor] execute() начат")
 
         self._setup_execution_plot(self.result)
 
         while True:
+            print("[DEBUG InterruptibleExecutor] Вызов interruptible_function()")
             partial_result = self.interruptible_function()
             self.result.update(partial_result)
 
             if self.interrupted:
-                self.delete_wrong_results()
+                print("[DEBUG InterruptibleExecutor] Прерывание обнаружено!")
+                if not self.skip_delete_wrong_results:
+                    print("[DEBUG InterruptibleExecutor] Вызов delete_wrong_results()")
+                    self.delete_wrong_results()
+                print("[DEBUG InterruptibleExecutor] Вызов select_correcting_params()")
                 self.select_correcting_params()
 
                 self.interrupted = False
+                self.skip_delete_wrong_results = False
+                print("[DEBUG InterruptibleExecutor] Продолжаем выполнение после корректировки")
             else:
+                print("[DEBUG InterruptibleExecutor] Выполнение завершено без прерываний")
                 break
 
         self._close_execution_plot()
@@ -54,6 +64,7 @@ class InterruptibleExecutor(Executor):
         self._update_line(result)
 
     def on_interrupt(self, event):
+        print("[DEBUG InterruptibleExecutor] КНОПКА INTERRUPT НАЖАТА!")
         self.interrupted = True
 
     def _make_interrupt_button(self, figure):
