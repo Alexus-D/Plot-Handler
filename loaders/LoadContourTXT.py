@@ -1,6 +1,7 @@
 import numpy as np
 
 from .Loader import Loader
+import utils.unit_transformations as ut
 
 
 class LoadContourTXT(Loader):
@@ -26,6 +27,8 @@ class LoadContourTXT(Loader):
         if self.last_line_err:
             z = z[:-1, :]
             x = x[:-1]
+        
+        
 
         return {
             "x": x,

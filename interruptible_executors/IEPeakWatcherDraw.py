@@ -177,15 +177,14 @@ class IEPeakWatcherDraw(IEPeakWatcher):
                     "peak_freq": traj_data["freq"][-1],
                     "peak_width": traj_data["width"][-1],
                     "prominence": traj_data["prominence"][-1],
-                    "peak_type": self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
+                    "peak_type": fixed_peak_type if fixed_peak_type else self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
                 }
                 print(f"[IEPeakWatcherDraw] Траектория {traj_idx+1}: использую последние параметры")
             else:
                 current_params = self.initial_peak_params[traj_idx].copy()
                 print(f"[IEPeakWatcherDraw] Траектория {traj_idx+1}: использую начальные параметры")
-
-            if fixed_peak_type:
-                current_params["peak_type"] = fixed_peak_type
+                if fixed_peak_type:
+                    current_params["peak_type"] = fixed_peak_type
 
             print(f"[DEBUG] Цикл по полям: start_idx={start_idx}, total_indices={len(self._field_indices)}")
             for i in range(start_idx, len(self._field_indices)):
@@ -237,6 +236,7 @@ class IEPeakWatcherDraw(IEPeakWatcher):
                 traj_data["width"].append(peak["width"])
                 traj_data["method"].append(peak["method"])
 
+                # Фиксируем тип пика после первого успешного нахождения
                 if fixed_peak_type is None:
                     inferred_type = self._infer_peak_type(
                         freqs,
@@ -247,11 +247,13 @@ class IEPeakWatcherDraw(IEPeakWatcher):
                     )
                     self._set_fixed_peak_type(traj_idx, traj_data, inferred_type)
                     fixed_peak_type = inferred_type
-                    current_params["peak_type"] = inferred_type
+                    print(f"[IEPeakWatcherDraw] Траектория {traj_idx+1}: зафиксирован тип пика = {inferred_type}")
 
+                # Обновляем параметры для следующего шага (всегда используем зафиксированный тип)
                 current_params["peak_freq"] = peak["freq"]
                 current_params["peak_width"] = peak["width"]
                 current_params["prominence"] = peak["prominence"]
+                current_params["peak_type"] = fixed_peak_type
 
                 print(f"[DEBUG] Обновление визуализации, текущих точек: {len(traj_data['fields'])}")
                 self._update_line(self.result)

@@ -25,6 +25,8 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
+resonator_data = make_step
+
 data = make_step(data, executors.EFilter, "Filter Step")
 
 result = make_step(data, interruptible_executors.IEPeakWatcherTwoDir, "Peak Watcher")
@@ -41,8 +43,8 @@ data.update(result)
 approx_params = {
     "model": "Fano",              # или "Lorentzian"
     "fit_windows": [
-        (0.010, 0.025),
-        (0.015, 0.010)
+        (0.007, 0.025),
+        (0.015, 0.007)
     ] # окно фита = width * multiplier
 }
 approx_result = make_step(data, interruptible_executors.IEPeakApproximatorTwoDir, "Peak Approximator", approx_params)

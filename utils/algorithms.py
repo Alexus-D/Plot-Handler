@@ -113,19 +113,18 @@ def find_peak(freqs, s_values, expected_freq, expected_width, expected_prominenc
         }
     
     # Если find_peaks не нашел - ищем экстремум в окрестности
-    if peak_type == 'minimum':
-        peak_idx = np.argmin(local_s_values)
-    else:  # 'maximum'
-        peak_idx = np.argmax(local_s_values)
+    # local_s_values уже инвертированы для минимумов, поэтому всегда ищем максимум
+    peak_idx = np.argmax(local_s_values)
     
     peak_freq = local_freqs[peak_idx]
-    peak_magnitude = local_s_values[peak_idx]
+    # Возвращаем правильное значение magnitude с учётом инверсии
+    peak_magnitude = local_s_values[peak_idx] if peak_type == 'maximum' else -local_s_values[peak_idx]
     
     # Оцениваем prominence вручную (разница между пиком и средним значением боковых частей)
-    left_baseline = np.median(local_s_values[:max(1, peak_idx)]) if peak_idx > 0 else peak_magnitude
-    right_baseline = np.median(local_s_values[min(len(local_s_values)-1, peak_idx+1):]) if peak_idx < len(local_s_values)-1 else peak_magnitude
+    left_baseline = np.median(local_s_values[:max(1, peak_idx)]) if peak_idx > 0 else local_s_values[peak_idx]
+    right_baseline = np.median(local_s_values[min(len(local_s_values)-1, peak_idx+1):]) if peak_idx < len(local_s_values)-1 else local_s_values[peak_idx]
     baseline = (left_baseline + right_baseline) / 2
-    peak_prominence = abs(peak_magnitude - baseline)
+    peak_prominence = abs(local_s_values[peak_idx] - baseline)
     
     # Используем исходную оценку ширины
     peak_width = expected_width
@@ -167,3 +166,17 @@ def make_cut(data: dict, cut_value: float, axis: str = 'x') -> dict:
         return {'x': new_x, 'y': new_y}
     else:
         raise ValueError("Axis must be 'x' or 'y'")
+    
+
+def estimate_cavity_params(res_magnitude, resonance_freq, cavity_width, plato):
+    
+    con = np.abs(res_magnitude - plato)
+
+    kappa = con * cavity_width / 2
+    beta = cavity_width / 2 * (1 - con)
+
+    return {'kappa': kappa,
+            'beta': beta,
+            'resonance_freq': resonance_freq,
+            'plato': plato,
+            'res_magnitude': res_magnitude}

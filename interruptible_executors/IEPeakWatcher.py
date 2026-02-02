@@ -20,6 +20,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         self._field_indices = []
         self._continue_from_idx = None
         self._start_traj_idx = 0  # С какой траектории начинать при возобновлении
+        self._fixed_peak_types = {}
         
         # Графики
         self.figure = None
@@ -190,6 +191,43 @@ class IEPeakWatcher(InterruptibleExecutor):
         
         return indices
 
+    def _infer_peak_type(self, freqs, s_values, peak_freq, expected_freq, expected_width):
+        """
+        Определяет тип пика (minimum/maximum) по знаку отклонения от базовой линии.
+        """
+        search_window = expected_width * 3 if expected_width is not None else None
+        if search_window is None:
+            local_mask = np.ones_like(freqs, dtype=bool)
+        else:
+            freq_range = (expected_freq - search_window / 2, expected_freq + search_window / 2)
+            local_mask = (freqs >= freq_range[0]) & (freqs <= freq_range[1])
+
+        local_values = s_values[local_mask]
+        baseline = np.median(local_values) if len(local_values) > 0 else np.median(s_values)
+
+        peak_idx = np.abs(freqs - peak_freq).argmin()
+        peak_value = s_values[peak_idx]
+
+        return "minimum" if peak_value < baseline else "maximum"
+
+    def _get_fixed_peak_type(self, traj_idx, traj_data, fallback_type=None):
+        """
+        Возвращает зафиксированный тип пика для траектории, если он уже известен.
+        """
+        if traj_idx in self._fixed_peak_types:
+            return self._fixed_peak_types[traj_idx]
+
+        fixed_type = traj_data.get("peak_type_fixed")
+        if fixed_type:
+            self._fixed_peak_types[traj_idx] = fixed_type
+            return fixed_type
+
+        return fallback_type
+
+    def _set_fixed_peak_type(self, traj_idx, traj_data, peak_type):
+        self._fixed_peak_types[traj_idx] = peak_type
+        traj_data["peak_type_fixed"] = peak_type
+
     def interruptible_function(self):
         """
         Основной цикл отслеживания пиков по всем траекториям.
@@ -219,6 +257,12 @@ class IEPeakWatcher(InterruptibleExecutor):
                 })
             
             traj_data = self.result["trajectories"][traj_idx]
+
+            fixed_peak_type = self._get_fixed_peak_type(
+                traj_idx,
+                traj_data,
+                fallback_type=self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
+            )
             
             # Получаем индексы полей для этой траектории
             self._field_indices = self._get_fields_range(start[0], end[0])
@@ -245,12 +289,14 @@ class IEPeakWatcher(InterruptibleExecutor):
                     "peak_freq": traj_data["freq"][-1],
                     "peak_width": traj_data["width"][-1],
                     "prominence": traj_data["prominence"][-1],
-                    "peak_type": self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
+                    "peak_type": fixed_peak_type if fixed_peak_type else self.initial_peak_params[traj_idx].get("peak_type", config_physics.PEAK_TYPE)
                 }
                 print(f"[IEPeakWatcher] Траектория {traj_idx+1}: использую последние параметры")
             else:
                 current_params = self.initial_peak_params[traj_idx].copy()
                 print(f"[IEPeakWatcher] Траектория {traj_idx+1}: использую начальные параметры")
+                if fixed_peak_type:
+                    current_params["peak_type"] = fixed_peak_type
             
             # Цикл по полям
             print(f"[DEBUG] Цикл по полям: start_idx={start_idx}, total_indices={len(self._field_indices)}")
@@ -285,11 +331,25 @@ class IEPeakWatcher(InterruptibleExecutor):
                 traj_data["prominence"].append(peak["prominence"])
                 traj_data["width"].append(peak["width"])
                 traj_data["method"].append(peak["method"])
+
+                # Фиксируем тип пика после первого успешного нахождения
+                if fixed_peak_type is None:
+                    inferred_type = self._infer_peak_type(
+                        freqs,
+                        s_values,
+                        peak["freq"],
+                        current_params["peak_freq"],
+                        current_params.get("peak_width", current_params.get("width", 0.1))
+                    )
+                    self._set_fixed_peak_type(traj_idx, traj_data, inferred_type)
+                    fixed_peak_type = inferred_type
+                    print(f"[IEPeakWatcher] Траектория {traj_idx+1}: зафиксирован тип пика = {inferred_type}")
                 
-                # Обновляем параметры для следующего шага
+                # Обновляем параметры для следующего шага (всегда используем зафиксированный тип)
                 current_params["peak_freq"] = peak["freq"]
                 current_params["peak_width"] = peak["width"]
                 current_params["prominence"] = peak["prominence"]
+                current_params["peak_type"] = fixed_peak_type
                 
                 # Обновляем визуализацию
                 print(f"[DEBUG] Обновление визуализации, текущих точек: {len(traj_data['fields'])}")
