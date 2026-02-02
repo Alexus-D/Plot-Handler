@@ -19,6 +19,7 @@ class IEPeakWatcher(InterruptibleExecutor):
         self._current_traj_idx = 0
         self._field_indices = []
         self._continue_from_idx = None
+        self._start_traj_idx = 0  # С какой траектории начинать при возобновлении
         
         # Графики
         self.figure = None
@@ -195,7 +196,13 @@ class IEPeakWatcher(InterruptibleExecutor):
         """
         print("[IEPeakWatcher] Старт: отслеживание пиков")
         print(f"[DEBUG] interrupted={self.interrupted}, correcting_params={bool(self.correcting_params)}")
-        for traj_idx, (start, end) in enumerate(self.trajectories):
+        
+        # Начинаем с сохраненной траектории (если возобновляем после прерывания)
+        start_idx = self._start_traj_idx
+        self._start_traj_idx = 0  # Сбрасываем после использования
+        
+        for traj_idx in range(start_idx, len(self.trajectories)):
+            start, end = self.trajectories[traj_idx]
             self._current_traj_idx = traj_idx
             print(f"[IEPeakWatcher] Траектория {traj_idx+1}: старт")
             print(f"[DEBUG] Траектория {traj_idx+1}: interrupted={self.interrupted}")
@@ -268,6 +275,7 @@ class IEPeakWatcher(InterruptibleExecutor):
                     self.interrupted = True
                     self.skip_delete_wrong_results = True
                     self._continue_from_idx = i
+                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории
                     return self.result
                 
                 # Сохраняем результат
@@ -295,14 +303,19 @@ class IEPeakWatcher(InterruptibleExecutor):
                     print(f"[IEPeakWatcher] Траектория {traj_idx+1}: прервано пользователем")
                     print(f"[DEBUG] Прерывание: устанавливаем _continue_from_idx={i + 1}")
                     self._continue_from_idx = i + 1
+                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории для возобновления
                     return self.result
             
             # Конец траектории - валидация
             if not self._validate_trajectory_end():
                 print(f"[IEPeakWatcher] Траектория {traj_idx+1}: отклонена пользователем")
                 self.interrupted = True
+                self._start_traj_idx = traj_idx  # Сохраняем для повторной обработки этой траектории
                 return self.result
             print(f"[IEPeakWatcher] Траектория {traj_idx+1}: подтверждена")
+            
+            # Сбрасываем индексы после успешного завершения траектории
+            self._continue_from_idx = None
         
         return self.result
 

@@ -48,6 +48,7 @@ class IEPeakApproximator(InterruptibleExecutor):
         self._current_traj_idx = 0
         self._current_point_idx = 0
         self._continue_from_idx = None
+        self._start_traj_idx = 0  # С какой траектории начинать при возобновлении
         
         # Текущие данные среза для отображения
         self._current_cut_freqs = None
@@ -228,7 +229,12 @@ class IEPeakApproximator(InterruptibleExecutor):
         """
         print("[IEPeakApproximator] Старт: аппроксимация пиков")
         
-        for traj_idx, input_traj in enumerate(self.input_trajectories):
+        # Начинаем с сохраненной траектории (если возобновляем после прерывания)
+        start_idx = self._start_traj_idx
+        self._start_traj_idx = 0  # Сбрасываем после использования
+        
+        for traj_idx in range(start_idx, len(self.input_trajectories)):
+            input_traj = self.input_trajectories[traj_idx]
             self._current_traj_idx = traj_idx
             print(f"[IEPeakApproximator] Траектория {traj_idx+1}: старт")
             
@@ -289,6 +295,7 @@ class IEPeakApproximator(InterruptibleExecutor):
                     self.interrupted = True
                     self.skip_delete_wrong_results = True
                     self._continue_from_idx = i
+                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории
                     return self.result
                 
                 # Получаем начальные параметры
@@ -313,6 +320,7 @@ class IEPeakApproximator(InterruptibleExecutor):
                     self.interrupted = True
                     self.skip_delete_wrong_results = True
                     self._continue_from_idx = i
+                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории
                     return self.result
                 
                 # Сохраняем результат
@@ -352,14 +360,19 @@ class IEPeakApproximator(InterruptibleExecutor):
                 if self.interrupted:
                     print(f"[IEPeakApproximator] Траектория {traj_idx+1}: прервано пользователем")
                     self._continue_from_idx = i + 1
+                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории для возобновления
                     return self.result
             
             # Конец траектории - валидация
             if not self._validate_trajectory_end():
                 print(f"[IEPeakApproximator] Траектория {traj_idx+1}: отклонена пользователем")
                 self.interrupted = True
+                self._start_traj_idx = traj_idx  # Сохраняем для повторной обработки этой траектории
                 return self.result
             print(f"[IEPeakApproximator] Траектория {traj_idx+1}: подтверждена")
+            
+            # Сбрасываем индексы после успешного завершения траектории
+            self._continue_from_idx = None
         
         return self.result
 
