@@ -27,7 +27,7 @@ data = loader.load_data()
 
 data = make_step(data, executors.EFilter, "Filter Step")
 
-result = make_step(data, interruptible_executors.IEPeakWatcher, "Peak Watcher")
+result = make_step(data, interruptible_executors.IEPeakWatcherTwoDir, "Peak Watcher")
 
 data_params = {
     "result_path": os.path.join(result_path, "ie_peak_watcher_result.txt")
@@ -45,7 +45,7 @@ approx_params = {
         (0.015, 0.010)
     ] # окно фита = width * multiplier
 }
-approx_result = make_step(data, interruptible_executors.IEPeakApproximator, "Peak Approximator", approx_params)
+approx_result = make_step(data, interruptible_executors.IEPeakApproximatorTwoDir, "Peak Approximator", approx_params)
 
 data_params["result_path"] = os.path.join(result_path, "ie_peak_approximator_result.txt")
 save_with_loader(loaders.LoadIEPeakApproximator, data_params, approx_result)
