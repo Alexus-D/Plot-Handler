@@ -1,6 +1,6 @@
 import numpy as np
 
-def convert_dB_to_linear(data: dict) -> dict:
+def convert_dB_to_linear(x):
     """
     Converts z-values in the data dictionary from dB to linear scale.
 
@@ -10,11 +10,11 @@ def convert_dB_to_linear(data: dict) -> dict:
     Returns:
     - A new dictionary with the same 'x' and 'y', but 'z' converted to linear scale.
     """
-    linear_data = data.copy()
-    linear_data['z'] = 10 ** (data['z'] / 10)
-    return linear_data
 
-def convert_linear_to_dB(data: dict) -> dict:
+    linear = 10 ** (x / 10)
+    return linear
+
+def convert_linear_to_dB(x):
     """
     Converts z-values in the data dictionary from linear scale to dB.
 
@@ -24,6 +24,6 @@ def convert_linear_to_dB(data: dict) -> dict:
     Returns:
     - A new dictionary with the same 'x' and 'y', but 'z' converted to dB.
     """
-    dB_data = data.copy()
-    dB_data['z'] = 10 * np.log10(data['z'])
-    return dB_data
+
+    dB = 10 * np.log10(x)
+    return dB

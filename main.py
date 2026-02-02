@@ -29,4 +29,13 @@ result = make_step(data, interruptible_executors.IEPeakWatcher, "Peak Watcher")
 
 data.update(result)
 
+# Аппроксимация пиков моделью Fano (или Lorentzian)
+approx_params = {
+    "model": "Fano",              # или "Lorentzian"
+    "fit_window_multiplier": 3.0  # окно фита = width * multiplier
+}
+approx_result = make_step(data, interruptible_executors.IEPeakApproximator, "Peak Approximator", approx_params)
+
+data.update(approx_result)
+
 

@@ -1,5 +1,7 @@
 import numpy as np
 
+import utils.unit_transformations as ut
+
 def Lorentzian(x: np.ndarray, x0: float, gamma: float, A: float, y0: float) -> np.ndarray:
     """
     Computes the Lorentzian function.
@@ -31,6 +33,9 @@ def Fano(x: np.ndarray, x0: float, gamma: float, q: float, A: float, y0: float) 
 
     Returns:
     np.ndarray: Computed Fano resonance values.
-    """
+    """    
     epsilon = (x - x0) / (gamma / 2)
-    return A * ((q + epsilon)**2 / (1 + epsilon**2)) + y0
+    fano_normalized = ((q + epsilon)**2) / (1 + epsilon**2) / (1 + q**2)
+    y0_linear = ut.convert_dB_to_linear(y0)
+    result_linear = A * fano_normalized + y0_linear
+    return ut.convert_linear_to_dB(result_linear)
