@@ -626,6 +626,14 @@ class IEPeakWatcher(InterruptibleExecutor):
             plt.close(self.figure)
             self.figure = None
         plt.ioff()
+    
+    def save_figure(self, filepath: str, dpi: int = 150):
+        """Сохраняет фигуру в файл."""
+        if self.figure is not None:
+            print(f"[IEPeakWatcher] Сохранение фигуры: {filepath}")
+            self.figure.savefig(filepath, dpi=dpi, bbox_inches='tight')
+        else:
+            print("[IEPeakWatcher] WARNING: figure is None, cannot save")
 
     def validate(self):
         """Валидация результата - всегда True, т.к. валидация происходит интерактивно."""
