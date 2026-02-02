@@ -38,7 +38,7 @@ class IEPeakApproximator(InterruptibleExecutor):
         
         self.model_name = model_name
         self.model_func = self.SUPPORTED_MODELS[model_name]
-        self.fit_window_multiplier = initial_params.get("fit_window_multiplier", 1.5)
+        self.fit_window_multiplier = initial_params.get("fit_window_multiplier", 1.0)
         
         # Траектории из входных данных
         self.input_trajectories = data.get("trajectories", [])
