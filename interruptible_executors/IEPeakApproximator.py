@@ -38,12 +38,25 @@ class IEPeakApproximator(InterruptibleExecutor):
         
         self.model_name = model_name
         self.model_func = self.SUPPORTED_MODELS[model_name]
-        self.fit_window_multiplier = initial_params.get("fit_window_multiplier", 1.0)
+        self.fit_window_multiplier = initial_params.get("fit_window_multiplier", 0.5)
         
         # Траектории из входных данных
         self.input_trajectories = data.get("trajectories", [])
         if not self.input_trajectories:
             raise ValueError("No trajectories in input data. Run IEPeakWatcher first.")
+        
+        # Границы области фита для каждой траектории: [(left_shift, right_shift), ...]
+        # Если задано, то окно фита будет (x0 - left_shift, x0 + right_shift)
+        self.fit_windows = initial_params.get("fit_windows", None)
+        if self.fit_windows is not None:
+            if len(self.fit_windows) != len(self.input_trajectories):
+                raise ValueError(
+                    f"fit_windows length ({len(self.fit_windows)}) must match "
+                    f"number of trajectories ({len(self.input_trajectories)})"
+                )
+            print(f"[IEPeakApproximator] Используются заданные границы фита: {self.fit_windows}")
+        else:
+            print(f"[IEPeakApproximator] Используется fit_window_multiplier={self.fit_window_multiplier}")
         
         self._current_traj_idx = 0
         self._current_point_idx = 0
@@ -199,11 +212,26 @@ class IEPeakApproximator(InterruptibleExecutor):
         Returns:
             dict: параметры фита {x0, gamma, A, y0, q (только для Fano)}
         """
+        # Задаем границы для параметров
+        # x0 может меняться не более чем на 10% от ожидаемого значения
+        x0_expected = p0[0]
+        x0_lower = x0_expected * 0.9
+        x0_upper = x0_expected * 1.1
+        
+        if self.model_name == "Fano":
+            # Параметры: [x0, gamma, q, A, y0]
+            lower_bounds = [-np.inf, 0, -np.inf, -np.inf, -np.inf]
+            upper_bounds = [np.inf, np.inf, np.inf, np.inf, np.inf]
+        else:  # Lorentzian
+            # Параметры: [x0, gamma, A, y0]
+            lower_bounds = [-np.inf, 0, -np.inf, -np.inf]
+            upper_bounds = [np.inf, np.inf, np.inf, np.inf]
+        
         popt = alg.approximation_by_phys_model(
             freqs, s_values, 
             self.model_func, 
             p0, 
-            {"maxfev": 5000}
+            {"maxfev": 50000, "bounds": (lower_bounds, upper_bounds)}
         )
         
         if self.model_name == "Fano":
@@ -284,8 +312,14 @@ class IEPeakApproximator(InterruptibleExecutor):
                 s_values = self.data["z"][field_idx, :]
                 
                 # Определяем окно фита
-                fit_window = expected_width * self.fit_window_multiplier
-                freq_mask = (freqs >= expected_freq - fit_window/2) & (freqs <= expected_freq + fit_window/2)
+                if self.fit_windows is not None:
+                    # Используем заданные границы для данной траектории
+                    left_shift, right_shift = self.fit_windows[traj_idx]
+                    freq_mask = (freqs >= expected_freq - left_shift) & (freqs <= expected_freq + right_shift)
+                else:
+                    # Используем старый метод с multiplier
+                    fit_window = expected_width * self.fit_window_multiplier
+                    freq_mask = (freqs >= expected_freq - fit_window/2) & (freqs <= expected_freq + fit_window/2)
                 
                 fit_freqs = freqs[freq_mask]
                 fit_values = s_values[freq_mask]
