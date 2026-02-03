@@ -54,8 +54,8 @@ if len(trajectories) >= 2:
     fields1 = np.array(trajectories[1].get("fields", []))
     freq0 = np.array(trajectories[0].get("freq", []))
     freq1 = np.array(trajectories[1].get("freq", []))
-    mag0 = np.array(trajectories[0].get("magnitude", []))
-    mag1 = np.array(trajectories[1].get("magnitude", []))
+    width0 = np.array(trajectories[0].get("width", []))
+    width1 = np.array(trajectories[1].get("width", []))
     
     # Find common fields (with small tolerance for floating point comparison)
     common_fields = []
@@ -68,8 +68,8 @@ if len(trajectories) >= 2:
         if len(idx) > 0:
             j = idx[0]
             common_fields.append(field)
-            mode1_sync.append(complex(freq0[i], mag0[i]))
-            mode2_sync.append(complex(freq1[j], mag1[j]))
+            mode1_sync.append(complex(freq0[i], width0[i]))
+            mode2_sync.append(complex(freq1[j], width1[j]))
     
     if len(common_fields) == 0:
         raise ValueError("No common fields found between trajectories")
