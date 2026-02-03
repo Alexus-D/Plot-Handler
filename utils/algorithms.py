@@ -3,6 +3,11 @@ import scipy as sp
 
 import config_physics
 
+
+def find_left_range_for_approximatio(n(x: np.ndarray, y: np.ndarray, threshold: float) -> float:
+                                     pass
+
+
 def approximation_by_phys_model(x: np.ndarray, y: np.ndarray, model_func, initial_params: list, approximation_params: dict) -> list:
     """
     Fits the provided physical model to the data using non-linear least squares optimization.
@@ -103,6 +108,8 @@ def find_peak(freqs, s_values, expected_freq, expected_width, expected_prominenc
         peak_magnitude = local_s_values[peak_idx] if peak_type == 'maximum' else -local_s_values[peak_idx]
         peak_prominence = found_peaks[1]['prominences'][idx_in_result]
         peak_width = found_peaks[1]['widths'][idx_in_result] * freq_step
+
+
         
         return {
             'freq': peak_freq,
