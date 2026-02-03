@@ -88,6 +88,14 @@ save_with_loader(loaders.LoadECouplingExtractor, data_params, coupling_data)
 data.update(coupling_data)
 loaders.LoadECouplingExtractor(data_params).plot_and_save(coupling_data, plots_dir=result_path)
 
+reconstructed_params = make_step(data, executors.ESParamsReconstructor, "ES Params Reconstruction")
+data_params = {
+    "result_path": os.path.join(result_path, "es_params_reconstructor_result.txt")
+}
+save_with_loader(loaders.LoadESParamsReconstructor, data_params, reconstructed_params)
+data.update(reconstructed_params)
+loaders.LoadESParamsReconstructor(data_params).plot_and_save(reconstructed_params, plots_dir=result_path)
+
 # # Аппроксимация пиков моделью Fano (или Lorentzian)
 # approx_params = {
 #     "model": "Fano",              # или "Lorentzian"
