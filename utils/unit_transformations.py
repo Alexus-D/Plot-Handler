@@ -24,6 +24,10 @@ def convert_linear_to_dB(x):
     Returns:
     - A new dictionary with the same 'x' and 'y', but 'z' converted to dB.
     """
-
-    dB = 10 * np.log10(x)
+    # Handle invalid values (negative or zero)
+    x = np.asarray(x)
+    with np.errstate(invalid='ignore', divide='ignore'):
+        dB = 10 * np.log10(np.abs(x))
+    # Replace inf/-inf with very small/large values
+    dB = np.where(np.isfinite(dB), dB, -300)
     return dB

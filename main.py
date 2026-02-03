@@ -36,11 +36,9 @@ data.update(resonator_data)
 data = make_step(data, executors.EFilter, "Filter Step")
 
 peak_watcher = interruptible_executors.IEPeakWatcherTwoDir(data, "Peak Watcher")
+peak_watcher.save_figure_path = os.path.join(result_path, "peak_watcher_figure.png")
 peak_watcher.execute_with_validation()
 result = peak_watcher.get_result()
-
-# Save figure before closing
-peak_watcher.save_figure(os.path.join(result_path, "peak_watcher_figure.png"))
 
 data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.txt")
 save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
@@ -50,12 +48,35 @@ data.update(result)
 # Prepare own_modes from trajectories for coupling extraction
 trajectories = result.get("trajectories", [])
 if len(trajectories) >= 2:
+    # Synchronize trajectories by field values
+    import numpy as np
+    fields0 = np.array(trajectories[0].get("fields", []))
+    fields1 = np.array(trajectories[1].get("fields", []))
+    freq0 = np.array(trajectories[0].get("freq", []))
+    freq1 = np.array(trajectories[1].get("freq", []))
+    mag0 = np.array(trajectories[0].get("magnitude", []))
+    mag1 = np.array(trajectories[1].get("magnitude", []))
+    
+    # Find common fields (with small tolerance for floating point comparison)
+    common_fields = []
+    mode1_sync = []
+    mode2_sync = []
+    
+    for i, field in enumerate(fields0):
+        # Find this field in trajectory 1
+        idx = np.where(np.abs(fields1 - field) < 0.01)[0]
+        if len(idx) > 0:
+            j = idx[0]
+            common_fields.append(field)
+            mode1_sync.append(complex(freq0[i], mag0[i]))
+            mode2_sync.append(complex(freq1[j], mag1[j]))
+    
+    if len(common_fields) == 0:
+        raise ValueError("No common fields found between trajectories")
+    
     own_modes = {
-        "fields": [trajectories[0].get("fields", [])],
-        "modes": [
-            [complex(f, m) for f, m in zip(trajectories[0].get("freq", []), trajectories[0].get("magnitude", []))],
-            [complex(f, m) for f, m in zip(trajectories[1].get("freq", []), trajectories[1].get("magnitude", []))]
-        ]
+        "fields": [common_fields],
+        "modes": [mode1_sync, mode2_sync]
     }
     data["own_modes"] = own_modes
 

@@ -59,8 +59,8 @@ class LoadECouplingExtractor(Loader):
 
 		series = [
 			("J", "J", data.get("J", [])),
-			("Gamma", "Gamma", data.get("Gamma", [])),
-			("gamma", "gamma", data.get("gamma", [])),
+			("Gamma", "Gamma_coupling", data.get("Gamma", [])),
+			("gamma", "gamma_induced", data.get("gamma", [])),
 			("Magnon Frequency", "magnon_freq", data.get("magnon_freq", [])),
 			("Magnon Frequency (Experimental)", "magnon_freq_experimental", data.get("magnon_freq_experimental", [])),
 			("Cavity Frequency", "cavity_freq", data.get("cavity_freq", [])),
@@ -72,7 +72,9 @@ class LoadECouplingExtractor(Loader):
 
 		for title, filename, values in series:
 			values = np.asarray(values)
+			print(f"[DEBUG] Processing: title={title}, filename={filename}, size={values.size}")
 			if values.size == 0:
+				print(f"[DEBUG] Skipping {filename} - empty data")
 				continue
 			fig, ax = plt.subplots(figsize=(6, 4))
 			ax.plot(fields, values, marker="o", markersize=3, linewidth=1)
@@ -84,6 +86,7 @@ class LoadECouplingExtractor(Loader):
 
 			for fmt in self.plot_formats:
 				path = os.path.join(plots_dir, f"{filename}.{fmt}")
+				print(f"[DEBUG] Saving: {path}")
 				fig.savefig(path, dpi=self.plot_dpi)
 			plt.close(fig)
 

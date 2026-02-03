@@ -46,6 +46,10 @@ class InterruptibleExecutor(Executor):
                 print("[DEBUG InterruptibleExecutor] Выполнение завершено без прерываний")
                 break
 
+        # Save figure before closing if save_figure_path is set
+        if hasattr(self, 'save_figure_path') and self.save_figure_path:
+            self.save_figure(self.save_figure_path)
+        
         self._close_execution_plot()
         return self.result
     
