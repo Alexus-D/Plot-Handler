@@ -5,7 +5,7 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_next_numbered_directory, save_with_loader
 
 
-data_path = "data/mease2026S21.txt"
+data_path = "data/DEN#3 bulk resonator.txt"
 result_path = os.path.join('results', os.path.basename(data_path).split('.')[0])
 result_path = make_next_numbered_directory(result_path)
 
