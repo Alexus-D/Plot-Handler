@@ -26,6 +26,12 @@ class Plotter(ABC):
         if self.figure is None:
             raise ValueError("No plot has been created to save.")
         self.figure.savefig(self.file_path, dpi=self.dpi)
+    
+    def plot_and_save(self):
+        if self.figure is None:
+            raise ValueError("No plot has been created to save.")
+        self.save_figure()
+        self.figure.show()
 
     @abstractmethod
     def create_figure(self) -> Figure:

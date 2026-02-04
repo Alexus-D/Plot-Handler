@@ -6,6 +6,7 @@ from .ETrajectories import ETrajectories
 from .EResonatorExtractor import EResonatorExtractor
 from .ECouplingExtractor import ECouplingExtractor
 from .ESParamsReconstructor import ESParamsReconstructor
+from .EModesMaker import EModesMaker
 
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
 	"EResonatorExtractor",
 	"ECouplingExtractor",
 	"ESParamsReconstructor",
+	"EModesMaker",
 ]

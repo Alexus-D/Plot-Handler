@@ -11,6 +11,9 @@ class Executor(ABC):
         self.data_for_visualization = {}
 
     def execute_with_validation(self):
+        if self.initial_params is not None:
+            self.execute()
+            return
         while True:
             self.select_initial_params()
             self.execute()

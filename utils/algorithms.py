@@ -183,6 +183,19 @@ def estimate_cavity_params(res_magnitude, resonance_freq, cavity_width, plato):
 
 
 def allighn_arrays(field1: np.ndarray, arr1: np.ndarray, field2: np.ndarray, arr2: np.ndarray):
+    field1 = np.asarray(field1)
+    field2 = np.asarray(field2)
+    arr1 = np.asarray(arr1)
+    arr2 = np.asarray(arr2)
+
+    field1_indexes = np.argsort(field1)
+    field2_indexes = np.argsort(field2)
+    field1 = field1[field1_indexes]
+    arr1 = arr1[field1_indexes]
+
+    field2 = field2[field2_indexes]
+    arr2 = arr2[field2_indexes]
+
     min_field = max(np.min(field1), np.min(field2))
     max_field = min(np.max(field1), np.max(field2))
 
