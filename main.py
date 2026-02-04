@@ -35,7 +35,7 @@ data.update(resonator_data)
 
 
 data = make_step(data, executors.EFilter, "Filter Step")
-data = make_step(data, executors.ESParamsRecipricator, "ES Params Reciprication")
+# data = make_step(data, executors.ESParamsRecipricator, "ES Params Reciprication")
 
 peak_watcher = interruptible_executors.IEPeakWatcherTwoDir(data, "Peak Watcher")
 peak_watcher.save_figure
@@ -47,6 +47,18 @@ data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.t
 save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
 
 data.update(result)
+
+bounds = make_step(data, executors.ERangerApproximator, "Ranger Approximator")
+data.update(bounds)
+
+# Аппроксимация пиков моделью Fano с использованием границ из ERangerApproximator
+approx_params = {
+    "model": "Fano"
+}
+approx_result = make_step(data, interruptible_executors.IEPeakApproximatorTwoDir, "Peak Approximator", approx_params)
+data_params["result_path"] = os.path.join(result_path, "ie_peak_approximator_result.txt")
+save_with_loader(loaders.LoadIEPeakApproximator, data_params, approx_result)
+data.update(approx_result)
 
 # Prepare own_modes from trajectories for coupling extraction
 trajectories = result.get("trajectories", [])
@@ -112,19 +124,5 @@ data_params = {
 save_with_loader(loaders.LoadESParamsReconstructor, data_params, reconstructed_params)
 data.update(reconstructed_params)
 loaders.LoadESParamsReconstructor(data_params).plot_and_save(reconstructed_params, plots_dir=result_path)
-
-# # Аппроксимация пиков моделью Fano (или Lorentzian)
-# approx_params = {
-#     "model": "Fano",              # или "Lorentzian"
-#     "fit_windows": [
-#         (0.007, 0.025),
-#         (0.015, 0.007)
-#     ] # окно фита = width * multiplier
-# }
-# approx_result = make_step(data, interruptible_executors.IEPeakApproximatorTwoDir, "Peak Approximator", approx_params)
-
-# data_params["result_path"] = os.path.join(result_path, "ie_peak_approximator_result.txt")
-# save_with_loader(loaders.LoadIEPeakApproximator, data_params, approx_result)
-# data.update(approx_result)
 
 

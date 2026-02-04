@@ -195,14 +195,22 @@ class IEPeakApproximator(InterruptibleExecutor):
             list: [x0, gamma, q, A, y0] для Fano или [x0, gamma, A, y0] для Lorentzian
         """
         x0 = freq
-        gamma = width
-        A = prominence
-        y0 = magnitude - prominence  # baseline
+        # gamma - полуширина, не меньше 0.001 ГГц
+        gamma = max(abs(width) / 2.0, 0.001)
+        y0 = magnitude  # baseline в дБ
         
         if self.model_name == "Fano":
+            # Для Fano: A - это амплитуда в линейных единицах
+            # prominence в дБ, конвертируем в линейные единицы
+            # Для минимума (negative prominence) A должна быть отрицательной
+            import utils.unit_transformations as ut
+            y0_linear = ut.convert_dB_to_linear(y0)
+            prom_linear = ut.convert_dB_to_linear(magnitude) - ut.convert_dB_to_linear(magnitude - prominence)
+            A = -abs(prom_linear) if prominence < 0 else abs(prom_linear)
             q = 1.0  # начальное приближение для параметра асимметрии
             return [x0, gamma, q, A, y0]
         else:  # Lorentzian
+            A = prominence
             return [x0, gamma, A, y0]
 
     def _fit_peak(self, freqs, s_values, p0):
@@ -213,25 +221,25 @@ class IEPeakApproximator(InterruptibleExecutor):
             dict: параметры фита {x0, gamma, A, y0, q (только для Fano)}
         """
         # Задаем границы для параметров
-        # x0 может меняться не более чем на 10% от ожидаемого значения
+        # x0 должен находиться в пределах окна фита
         x0_expected = p0[0]
-        x0_lower = x0_expected * 0.9
-        x0_upper = x0_expected * 1.1
+        x0_lower = freqs.min()
+        x0_upper = freqs.max()
         
         if self.model_name == "Fano":
             # Параметры: [x0, gamma, q, A, y0]
-            lower_bounds = [-np.inf, 0, -np.inf, -np.inf, -np.inf]
-            upper_bounds = [np.inf, np.inf, np.inf, np.inf, np.inf]
+            lower_bounds = [x0_lower, 0, -np.inf, -np.inf, -np.inf]
+            upper_bounds = [x0_upper, np.inf, np.inf, np.inf, np.inf]
         else:  # Lorentzian
             # Параметры: [x0, gamma, A, y0]
-            lower_bounds = [-np.inf, 0, -np.inf, -np.inf]
-            upper_bounds = [np.inf, np.inf, np.inf, np.inf]
+            lower_bounds = [x0_lower, 0, -np.inf, -np.inf]
+            upper_bounds = [x0_upper, np.inf, np.inf, np.inf]
         
         popt = alg.approximation_by_phys_model(
             freqs, s_values, 
             self.model_func, 
             p0, 
-            {"maxfev": 50000, "bounds": (lower_bounds, upper_bounds)}
+            {"maxfev": 100000, "bounds": (lower_bounds, upper_bounds)}
         )
         
         if self.model_name == "Fano":
@@ -312,12 +320,18 @@ class IEPeakApproximator(InterruptibleExecutor):
                 s_values = self.data["z"][field_idx, :]
                 
                 # Определяем окно фита
-                if self.fit_windows is not None:
-                    # Используем заданные границы для данной траектории
+                # Приоритет 1: границы из ERangerApproximator (lower_bound, upper_bound)
+                if "lower_bound" in input_traj and "upper_bound" in input_traj:
+                    lower_bound = input_traj["lower_bound"][i]
+                    upper_bound = input_traj["upper_bound"][i]
+                    freq_mask = (freqs >= lower_bound) & (freqs <= upper_bound)
+                    print(f"[IEPeakApproximator] Используются границы из ERangerApproximator: [{lower_bound:.4f}, {upper_bound:.4f}]")
+                # Приоритет 2: заданные fit_windows
+                elif self.fit_windows is not None:
                     left_shift, right_shift = self.fit_windows[traj_idx]
                     freq_mask = (freqs >= expected_freq - left_shift) & (freqs <= expected_freq + right_shift)
+                # Приоритет 3: старый метод с multiplier
                 else:
-                    # Используем старый метод с multiplier
                     fit_window = expected_width * self.fit_window_multiplier
                     freq_mask = (freqs >= expected_freq - fit_window/2) & (freqs <= expected_freq + fit_window/2)
                 
@@ -325,12 +339,8 @@ class IEPeakApproximator(InterruptibleExecutor):
                 fit_values = s_values[freq_mask]
                 
                 if len(fit_freqs) < 5:
-                    print(f"[IEPeakApproximator] Недостаточно точек в окне фита")
-                    self.interrupted = True
-                    self.skip_delete_wrong_results = True
-                    self._continue_from_idx = i
-                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории
-                    return self.result
+                    print(f"[IEPeakApproximator] Недостаточно точек в окне фита ({len(fit_freqs)} < 5), пропускаем")
+                    continue
                 
                 # Получаем начальные параметры
                 if self.correcting_params:
@@ -350,12 +360,8 @@ class IEPeakApproximator(InterruptibleExecutor):
                 try:
                     fit_result = self._fit_peak(fit_freqs, fit_values, p0)
                 except Exception as e:
-                    print(f"[IEPeakApproximator] Фит не удался: {e}")
-                    self.interrupted = True
-                    self.skip_delete_wrong_results = True
-                    self._continue_from_idx = i
-                    self._start_traj_idx = traj_idx  # Сохраняем индекс траектории
-                    return self.result
+                    print(f"[IEPeakApproximator] Фит не удался: {e}, пропускаем")
+                    continue
                 
                 # Сохраняем результат
                 traj_data["fields"].append(field)
@@ -385,8 +391,9 @@ class IEPeakApproximator(InterruptibleExecutor):
                     )
                 self._current_fit_freqs = fit_freqs_dense
                 
-                # Обновляем визуализацию
-                self._update_line(self.result)
+                # Обновляем визуализацию (только если marker инициализирован)
+                if self.marker is not None:
+                    self._update_line(self.result)
                 
                 plt.pause(0.001)
                 

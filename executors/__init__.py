@@ -7,6 +7,7 @@ from .EResonatorExtractor import EResonatorExtractor
 from .ECouplingExtractor import ECouplingExtractor
 from .ESParamsReconstructor import ESParamsReconstructor
 from .ESParamsRecipricator import ESParamsRecipricator
+from .ERangerApproximator import ERangerApproximator
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
 	"ECouplingExtractor",
 	"ESParamsReconstructor",
 	"ESParamsRecipricator",
+	"ERangerApproximator",
 ]

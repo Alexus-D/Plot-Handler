@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as sp
+from scipy import optimize as sp_optimize
 
 import config_physics
 
@@ -18,7 +18,7 @@ def approximation_by_phys_model(x: np.ndarray, y: np.ndarray, model_func, initia
     list: Optimized model parameters.
     """
     p0 = initial_params
-    popt, _ = sp.optimize.curve_fit(model_func, x, y, p0=p0, **approximation_params)
+    popt, _ = sp_optimize.curve_fit(model_func, x, y, p0=p0, **approximation_params)
     return popt.tolist()
 
 
