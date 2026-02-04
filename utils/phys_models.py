@@ -69,7 +69,7 @@ def simple_anticrossing_model(freqs, fields, params):
     if len(fields) != len(magnon_freqs):
         raise ValueError("Length of field array must match length of magnon_freq array")
 
-    response = np.zeros((len(fields), len(freqs)), dtype=complex)
+    linear_response = np.zeros((len(fields), len(freqs)), dtype=complex)
 
     for i, field in enumerate(fields):
         alpha = params['alpha'][i]
@@ -84,6 +84,8 @@ def simple_anticrossing_model(freqs, fields, params):
 
         denominator = cavity_term  - coupling**2 / magnon_term
 
-        response[i, :] = 1 + kappa / denominator
+        linear_response[i, :] = 1 + kappa / denominator
+
+    response_dB = ut.convert_linear_to_dB(np.abs(linear_response))
     
-    return np.abs(response)
+    return response_dB

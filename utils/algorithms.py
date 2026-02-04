@@ -180,3 +180,18 @@ def estimate_cavity_params(res_magnitude, resonance_freq, cavity_width, plato):
             'resonance_freq': resonance_freq,
             'plato': plato,
             'res_magnitude': res_magnitude}
+
+
+def allighn_arrays(field1: np.ndarray, arr1: np.ndarray, field2: np.ndarray, arr2: np.ndarray):
+    min_field = max(np.min(field1), np.min(field2))
+    max_field = min(np.max(field1), np.max(field2))
+
+    field_indexes1 = np.where((field1 >= min_field) & (field1 <= max_field))[0]
+    field_indexes2 = np.where((field2 >= min_field) & (field2 <= max_field))[0]
+
+    aligned_field = field1[field_indexes1]
+    aligned_arr1 = arr1[field_indexes1]
+    aligned_arr2 = arr2[field_indexes2]
+    return aligned_field, aligned_arr1, aligned_arr2
+    
+  

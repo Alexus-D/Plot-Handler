@@ -3,6 +3,7 @@ import os
 import loaders, executors, interruptible_executors
 
 from sugar import make_step, make_next_numbered_directory, save_with_loader
+import utils.algorithms as alg
 
 
 data_path = "data/DEN#3 bulk resonator.txt"
@@ -56,6 +57,20 @@ if len(trajectories) >= 2:
     freq1 = np.array(trajectories[1].get("freq", []))
     width0 = np.array(trajectories[0].get("width", []))
     width1 = np.array(trajectories[1].get("width", []))
+
+    common_fields, freq0, freq1 = alg.allighn_arrays(fields0, freq0, fields1, freq1)
+    _, width0, width1 = alg.allighn_arrays(fields0, width0, fields1, width1)
+
+    fields0 = np.array(common_fields)
+    fields1 = np.array(common_fields)
+
+    sum_damping = np.max(width0[-10:]) + np.min(width1[-10:])
+
+    for i, w in enumerate(width1):
+        cur_sum_damping = width0[i] + width1[i]
+        cur_sub_damping = width0[i] - width1[i]
+        if abs(sum_damping - cur_sum_damping) > abs(sum_damping - cur_sub_damping):
+            width1[i] = -width1[i]
     
     # Find common fields (with small tolerance for floating point comparison)
     common_fields = []
