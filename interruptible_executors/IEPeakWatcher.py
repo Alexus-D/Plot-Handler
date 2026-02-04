@@ -477,6 +477,8 @@ class IEPeakWatcher(InterruptibleExecutor):
         # Убираем кнопку и селектор
         ax_btn.remove()
         rect_selector.set_active(False)
+        rect_selector.disconnect_events()
+        del rect_selector
         
         self.figure.canvas.draw_idle()
 

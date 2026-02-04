@@ -35,9 +35,11 @@ data.update(resonator_data)
 
 
 data = make_step(data, executors.EFilter, "Filter Step")
+data = make_step(data, executors.ESParamsRecipricator, "ES Params Reciprication")
 
 peak_watcher = interruptible_executors.IEPeakWatcherTwoDir(data, "Peak Watcher")
-peak_watcher.save_figure_path = os.path.join(result_path, "peak_watcher_figure.png")
+peak_watcher.save_figure
+path = os.path.join(result_path, "peak_watcher_figure.png")
 peak_watcher.execute_with_validation()
 result = peak_watcher.get_result()
 
