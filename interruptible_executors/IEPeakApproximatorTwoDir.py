@@ -8,8 +8,8 @@ class IEPeakApproximatorTwoDir(IEPeakApproximator):
     - Trajectory 2 is processed in decreasing field direction.
     """
 
-    def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
-        super().__init__(data, stage_name, initial_params)
+    def __init__(self, data: dict, stage_name: str, initial_params: dict = None, save_figure_path: str = None):
+        super().__init__(data, stage_name, initial_params, save_figure_path)
 
         if len(self.input_trajectories) != 2:
             raise ValueError("IEPeakApproximatorTwoDir requires exactly 2 trajectories")

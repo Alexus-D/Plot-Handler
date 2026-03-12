@@ -9,7 +9,7 @@ from validators import VContourf
 
 
 class InterruptibleExecutor(Executor):
-    def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
+    def __init__(self, data: dict, stage_name: str, initial_params: dict = None, save_figure_path: str = None):
         super().__init__(data, stage_name, initial_params)
         self.interrupted = False
         self.skip_delete_wrong_results = False
@@ -18,6 +18,7 @@ class InterruptibleExecutor(Executor):
         self.marker = None
 
         self.correcting_params = {}
+        self.save_figure_path = save_figure_path
 
     def execute(self):
         self.remain_data = self.data.copy()
@@ -47,7 +48,7 @@ class InterruptibleExecutor(Executor):
                 break
 
         # Save figure before closing if save_figure_path is set
-        if hasattr(self, 'save_figure_path') and self.save_figure_path:
+        if hasattr(self, 'save_figure_path') and self.save_figure_path and hasattr(self, 'save_figure'):
             self.save_figure(self.save_figure_path)
         
         self._close_execution_plot()

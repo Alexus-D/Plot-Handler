@@ -2,8 +2,8 @@ from datetime import datetime
 import os
 
 
-def make_step(data, executor, step_name, initial_params=None):
-    step_executor = executor(data, stage_name=step_name, initial_params=initial_params)
+def make_step(data, executor, step_name, initial_params=None, **executor_kwargs):
+    step_executor = executor(data, stage_name=step_name, initial_params=initial_params, **executor_kwargs)
     step_executor.execute_with_validation()
     results = step_executor.get_result()
     return results

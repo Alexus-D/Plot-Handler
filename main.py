@@ -3,7 +3,6 @@ import os
 import loaders, executors, interruptible_executors
 
 from sugar import make_step, make_next_numbered_directory, save_with_loader
-import utils.algorithms as alg
 
 
 data_path = "data/2026_02_calibrated_stripline_with_film/somethingS21.txt"
@@ -35,74 +34,36 @@ save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
 data.update(resonator_data)
 
 
-# data = make_step(data, executors.EFilter, "Filter Step")
+data = make_step(data, executors.EFilter, "Filter Step")
 
-# peak_watcher = interruptible_executors.IEPeakWatcherTwoDir(data, "Peak Watcher")
-# peak_watcher.save_figure_path = os.path.join(result_path, "peak_watcher_figure.png")
-# peak_watcher.execute_with_validation()
-# result = peak_watcher.get_result()
+result = make_step(
+    data,
+    interruptible_executors.IEPeakWatcherTwoDir,
+    "Peak Watcher",
+    save_figure_path=os.path.join(result_path, "peak_watcher_figure.png")
+)
 
-# data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.txt")
-# save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
+data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.txt")
+save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
 
-# data.update(result)
+data.update(result)
 
-# # Prepare own_modes from trajectories for coupling extraction
-# trajectories = result.get("trajectories", [])
-# if len(trajectories) >= 2:
-#     # Synchronize trajectories by field values
-#     import numpy as np
-#     fields0 = np.array(trajectories[0].get("fields", []))
-#     fields1 = np.array(trajectories[1].get("fields", []))
-#     freq0 = np.array(trajectories[0].get("freq", []))
-#     freq1 = np.array(trajectories[1].get("freq", []))
-#     width0 = np.array(trajectories[0].get("width", []))
-#     width1 = np.array(trajectories[1].get("width", []))
+# Build own_modes from trajectories for coupling extraction
+own_modes_result = make_step(data, executors.EOwnModesBuilder, "Own Modes Builder")
+data_params = {
+    "result_path": os.path.join(result_path, "own_modes_result.txt")
+}
+save_with_loader(loaders.LoadEOwnModesBuilder, data_params, own_modes_result)
+data.update(own_modes_result)
+loaders.LoadEOwnModesBuilder(data_params).plot_and_save(own_modes_result, plots_dir=result_path)
 
-#     common_fields, freq0, freq1 = alg.allighn_arrays(fields0, freq0, fields1, freq1)
-#     _, width0, width1 = alg.allighn_arrays(fields0, width0, fields1, width1)
-
-#     fields0 = np.array(common_fields)
-#     fields1 = np.array(common_fields)
-
-#     sum_damping = np.max(width0[-10:]) + np.min(width1[-10:])
-
-#     for i, w in enumerate(width1):
-#         cur_sum_damping = width0[i] + width1[i]
-#         cur_sub_damping = width0[i] - width1[i]
-#         if abs(sum_damping - cur_sum_damping) > abs(sum_damping - cur_sub_damping):
-#             width1[i] = -width1[i]
-    
-#     # Find common fields (with small tolerance for floating point comparison)
-#     common_fields = []
-#     mode1_sync = []
-#     mode2_sync = []
-    
-#     for i, field in enumerate(fields0):
-#         # Find this field in trajectory 1
-#         idx = np.where(np.abs(fields1 - field) < 0.01)[0]
-#         if len(idx) > 0:
-#             j = idx[0]
-#             common_fields.append(field)
-#             mode1_sync.append(complex(freq0[i], width0[i]))
-#             mode2_sync.append(complex(freq1[j], width1[j]))
-    
-#     if len(common_fields) == 0:
-#         raise ValueError("No common fields found between trajectories")
-    
-#     own_modes = {
-#         "fields": [common_fields],
-#         "modes": [mode1_sync, mode2_sync]
-#     }
-#     data["own_modes"] = own_modes
-
-# coupling_data = make_step(data, executors.ECouplingExtractor, "Coupling Calculator")
-# data_params = {
-#     "result_path": os.path.join(result_path, "coupling_extractor_result.txt")
-# }
-# save_with_loader(loaders.LoadECouplingExtractor, data_params, coupling_data)
-# data.update(coupling_data)
-# loaders.LoadECouplingExtractor(data_params).plot_and_save(coupling_data, plots_dir=result_path)
+coupling_data = make_step(data, executors.ECouplingExtractor, "Coupling Calculator")
+data_params = {
+    "result_path": os.path.join(result_path, "coupling_extractor_result.txt")
+}
+save_with_loader(loaders.LoadECouplingExtractor, data_params, coupling_data)
+data.update(coupling_data)
+loaders.LoadECouplingExtractor(data_params).plot_and_save(coupling_data, plots_dir=result_path)
 
 # reconstructed_params = make_step(data, executors.ESParamsReconstructor, "ES Params Reconstruction")
 # data_params = {

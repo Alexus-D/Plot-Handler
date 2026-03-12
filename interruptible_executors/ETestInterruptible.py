@@ -13,8 +13,8 @@ TOTAL_PROCESSING_TIME = 2.0
 
 
 class ETestInterruptible(InterruptibleExecutor):
-    def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
-        super().__init__(data, stage_name, initial_params)
+    def __init__(self, data: dict, stage_name: str, initial_params: dict = None, save_figure_path: str = None):
+        super().__init__(data, stage_name, initial_params, save_figure_path)
         self.plotter = None
         self.marker = None
 

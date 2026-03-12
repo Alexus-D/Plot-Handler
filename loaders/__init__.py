@@ -5,6 +5,7 @@ from .LoadIEPeakApproximator import LoadIEPeakApproximator
 from .LoadEResonatorExtractor import LoadEResonatorExtractor
 from .LoadECouplingExtractor import LoadECouplingExtractor
 from .LoadESParamsReconstructor import LoadESParamsReconstructor
+from .LoadEOwnModesBuilder import LoadEOwnModesBuilder
 
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
 	"LoadEResonatorExtractor",
 	"LoadECouplingExtractor",
 	"LoadESParamsReconstructor",
+	"LoadEOwnModesBuilder",
 ]

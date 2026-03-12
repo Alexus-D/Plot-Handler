@@ -27,8 +27,8 @@ class IEPeakApproximator(InterruptibleExecutor):
         "Lorentzian": Lorentzian
     }
     
-    def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
-        super().__init__(data, stage_name, initial_params)
+    def __init__(self, data: dict, stage_name: str, initial_params: dict = None, save_figure_path: str = None):
+        super().__init__(data, stage_name, initial_params, save_figure_path)
         
         # Параметры модели
         initial_params = initial_params or {}

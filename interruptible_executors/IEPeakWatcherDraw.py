@@ -13,8 +13,8 @@ class IEPeakWatcherDraw(IEPeakWatcher):
     that separates their search regions.
     """
 
-    def __init__(self, data: dict, stage_name: str, initial_params: dict = None):
-        super().__init__(data, stage_name, initial_params)
+    def __init__(self, data: dict, stage_name: str, initial_params: dict = None, save_figure_path: str = None):
+        super().__init__(data, stage_name, initial_params, save_figure_path)
         self._boundary_points = None
         self._boundary_x = None
         self._boundary_y = None

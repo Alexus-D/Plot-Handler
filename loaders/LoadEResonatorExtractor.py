@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 import os
+import matplotlib.pyplot as plt
 
 from .Loader import Loader
 from plotters.PCutWithFit import PCutResonatorFit
@@ -143,6 +144,7 @@ class LoadEResonatorExtractor(Loader):
 		# Create plotter and save figure
 		plotter = PCutResonatorFit(plot_data)
 		plotter.save_figure()
+		plt.close(plotter.get_figure())
 
 	def _as_list(self, value):
 		if isinstance(value, np.ndarray):
