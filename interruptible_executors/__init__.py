@@ -5,7 +5,6 @@ from .IEPeakApproximator import IEPeakApproximator
 from .IEPeakWatcherHierarchy import IEPeakWatcherHierarchy
 from .IEPeakWatcherDraw import IEPeakWatcherDraw
 from .IEPeakWatcherTwoDir import IEPeakWatcherTwoDir
-from .IEPeakApproximatorTwoDir import IEPeakApproximatorTwoDir
 from .IEPeakWatcherPolyline import IEPeakWatcherPolyline
 
 
@@ -17,6 +16,5 @@ __all__ = [
 	"IEPeakWatcherHierarchy",
 	"IEPeakWatcherDraw",
 	"IEPeakWatcherTwoDir",
-	"IEPeakApproximatorTwoDir",
 	"IEPeakWatcherPolyline",
 ]
