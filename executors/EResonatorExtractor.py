@@ -38,7 +38,7 @@ def estimate_cavity_params(res_magnitude, resonance_freq, cavity_width, plato, p
         'peak_type': peak_type
     }
 
-def calculate_fit_weights(freqs, resonance_freq, peak_width, decay_factor=1.5):
+def calculate_fit_weights(freqs, resonance_freq, peak_width, decay_factor=5):
     """
     Calculate non-uniform weights for fitting with Gaussian-like distribution.
     
@@ -57,7 +57,7 @@ def calculate_fit_weights(freqs, resonance_freq, peak_width, decay_factor=1.5):
     distance = np.abs(freqs - resonance_freq)
     
     # Define peak region boundaries - extend to full peak_width for better edge fitting
-    peak_region = peak_width  # Extended from peak_width/2
+    peak_region = peak_width / 8   # Extended from peak_width/2
     
     # Use Gaussian-like weighting with different decay rates inside and outside peak region
     inside_peak = distance <= peak_region
@@ -108,7 +108,7 @@ def fit_cavity_response(freqs, s_average, initial_params):
     
     # STAGE 1: Preliminary fit using data ONLY in peak region
     # Define peak region boundaries
-    peak_region_mask = np.abs(freqs - initial_resonance_freq) <= peak_width
+    peak_region_mask = np.abs(freqs - initial_resonance_freq) <= peak_width / 4
     freqs_peak = freqs[peak_region_mask]
     s_peak = s_average_linear[peak_region_mask]
     
@@ -143,7 +143,7 @@ def fit_cavity_response(freqs, s_average, initial_params):
         popt_preliminary = p0
 
     # STAGE 2: Final fit with peak region recentered on refined resonance
-    peak_region_mask_final = np.abs(freqs - refined_resonance_freq) <= peak_width
+    peak_region_mask_final = np.abs(freqs - refined_resonance_freq) <= peak_width / 4
     freqs_peak_final = freqs[peak_region_mask_final]
     s_peak_final = s_average_linear[peak_region_mask_final]
     
