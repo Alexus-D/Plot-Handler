@@ -5,7 +5,7 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_next_numbered_directory, save_with_loader
 
 
-data_path = "data/2026_02_calibrated_stripline_with_film/somethingS21.txt"
+data_path = "data/2026_02_calibrated_stripline_with_film/CoherentS12.txt"
 result_path = data_path.replace("data", "results").rsplit(".", 1)[0]
 # result_path = os.path.join('results', os.path.basename(data_path).split('.')[0])
 result_path = make_next_numbered_directory(result_path)
@@ -26,19 +26,19 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
-resonator_data = make_step(data, executors.EResonatorExtractor, "Resonator Data Extraction")
-data_params = {
-    "result_path": os.path.join(result_path, "resonator_extractor_result.txt")
-}
-save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
-data.update(resonator_data)
+# resonator_data = make_step(data, executors.EResonatorExtractor, "Resonator Data Extraction")
+# data_params = {
+#     "result_path": os.path.join(result_path, "resonator_extractor_result.txt")
+# }
+# save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
+# data.update(resonator_data)
 
 
 data = make_step(data, executors.EFilter, "Filter Step")
 
 result = make_step(
     data,
-    interruptible_executors.IEPeakWatcher,
+    interruptible_executors.IEPeakWatcherPolyline,
     "Peak Watcher",
     save_figure_path=os.path.join(result_path, "peak_watcher_figure.png")
 )
@@ -48,22 +48,22 @@ save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
 
 data.update(result)
 
-# Build own_modes from trajectories for coupling extraction
-own_modes_result = make_step(data, executors.EOwnModesBuilder, "Own Modes Builder")
-data_params = {
-    "result_path": os.path.join(result_path, "own_modes_result.txt")
-}
-save_with_loader(loaders.LoadEOwnModesBuilder, data_params, own_modes_result)
-data.update(own_modes_result)
-loaders.LoadEOwnModesBuilder(data_params).plot_and_save(own_modes_result, plots_dir=result_path)
+# # Build own_modes from trajectories for coupling extraction
+# own_modes_result = make_step(data, executors.EOwnModesBuilder, "Own Modes Builder")
+# data_params = {
+#     "result_path": os.path.join(result_path, "own_modes_result.txt")
+# }
+# save_with_loader(loaders.LoadEOwnModesBuilder, data_params, own_modes_result)
+# data.update(own_modes_result)
+# loaders.LoadEOwnModesBuilder(data_params).plot_and_save(own_modes_result, plots_dir=result_path)
 
-coupling_data = make_step(data, executors.ECouplingExtractor, "Coupling Calculator")
-data_params = {
-    "result_path": os.path.join(result_path, "coupling_extractor_result.txt")
-}
-save_with_loader(loaders.LoadECouplingExtractor, data_params, coupling_data)
-data.update(coupling_data)
-loaders.LoadECouplingExtractor(data_params).plot_and_save(coupling_data, plots_dir=result_path)
+# coupling_data = make_step(data, executors.ECouplingExtractor, "Coupling Calculator")
+# data_params = {
+#     "result_path": os.path.join(result_path, "coupling_extractor_result.txt")
+# }
+# save_with_loader(loaders.LoadECouplingExtractor, data_params, coupling_data)
+# data.update(coupling_data)
+# loaders.LoadECouplingExtractor(data_params).plot_and_save(coupling_data, plots_dir=result_path)
 
 # reconstructed_params = make_step(data, executors.ESParamsReconstructor, "ES Params Reconstruction")
 # data_params = {

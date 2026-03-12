@@ -311,7 +311,7 @@ class IEPeakWatcher(InterruptibleExecutor):
                 try:
                     peak = alg.find_peak(
                         freqs, s_values,
-                        expected_freq=current_params["peak_freq"],
+                        expected_freq=self._get_expected_freq(traj_idx, field, current_params),
                         expected_width=current_params.get("peak_width", current_params.get("width", 0.1)),
                         expected_prominence=current_params["prominence"],
                         peak_type=current_params.get("peak_type", config_physics.PEAK_TYPE)
@@ -634,6 +634,11 @@ class IEPeakWatcher(InterruptibleExecutor):
             self.figure.savefig(filepath, dpi=dpi, bbox_inches='tight')
         else:
             print("[IEPeakWatcher] WARNING: figure is None, cannot save")
+
+    def _get_expected_freq(self, traj_idx: int, field: float, current_params: dict) -> float:
+        """Returns expected frequency for peak search at given field.
+        Override in subclasses to change the tracking strategy."""
+        return current_params["peak_freq"]
 
     def validate(self):
         """Валидация результата - всегда True, т.к. валидация происходит интерактивно."""

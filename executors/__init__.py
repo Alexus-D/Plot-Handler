@@ -3,6 +3,7 @@ from .EFilter import EFilter
 from .ECut import ECut
 from .EPeakParams import EPeakParams
 from .ETrajectories import ETrajectories
+from .EPolylineTrajectories import EPolylineTrajectories
 from .EResonatorExtractor import EResonatorExtractor
 from .ECouplingExtractor import ECouplingExtractor
 from .ESParamsReconstructor import ESParamsReconstructor
@@ -15,6 +16,7 @@ __all__ = [
 	"ECut",
 	"EPeakParams",
 	"ETrajectories",
+	"EPolylineTrajectories",
 	"EResonatorExtractor",
 	"ECouplingExtractor",
 	"ESParamsReconstructor",
