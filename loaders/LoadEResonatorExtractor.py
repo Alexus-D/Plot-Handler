@@ -1,6 +1,9 @@
 import numpy as np
+import pickle
+import os
 
 from .Loader import Loader
+from plotters.PCutWithFit import PCutResonatorFit
 
 
 class LoadEResonatorExtractor(Loader):
@@ -62,6 +65,7 @@ class LoadEResonatorExtractor(Loader):
 		if self.result_path is None:
 			raise ValueError("result_path is not set.")
 
+		# Save as text file
 		with open(self.result_path, "w", encoding="utf-8") as f:
 			f.write("# EResonatorExtractor results\n\n")
 
@@ -102,6 +106,43 @@ class LoadEResonatorExtractor(Loader):
 			fit_curve = data.get("fit_curve", [])
 			f.write("[fit_curve]\n")
 			f.write(f"values: {self._format_list(self._as_list(fit_curve))}\n")
+
+		# Save as pickle file
+		base_path, ext = os.path.splitext(self.result_path)
+		pickle_path = f"{base_path}.pkl"
+		with open(pickle_path, "wb") as f:
+			pickle.dump(data, f)
+
+		# Save plot
+		self._save_plot(data, base_path)
+
+	def _save_plot(self, data: dict, base_path: str):
+		"""Generate and save resonator fit plot."""
+		cut = data.get("cut", {})
+		x = cut.get("x", [])
+		y = cut.get("y", [])
+		fit_curve = data.get("fit_curve", [])
+		
+		if len(x) == 0 or len(y) == 0:
+			return  # Skip plotting if no data
+
+		# Prepare plot data
+		plot_data = {
+			"x": x,
+			"y": y,
+			"fit_curve": fit_curve if len(fit_curve) else None,
+			"resonance_freq": data.get("resonance_freq"),
+			"peak_width": data.get("cavity_width"),
+			"title": f"Resonator Fit (cut at {data.get('axis', '')}={data.get('cut_value', '')})",
+			"xlabel": "Frequency (GHz)",
+			"ylabel": "Magnitude (dB)",
+			"file_path": f"{base_path}.png",
+			"dpi": 300
+		}
+
+		# Create plotter and save figure
+		plotter = PCutResonatorFit(plot_data)
+		plotter.save_figure()
 
 	def _as_list(self, value):
 		if isinstance(value, np.ndarray):
