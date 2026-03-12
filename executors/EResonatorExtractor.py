@@ -124,15 +124,11 @@ def fit_cavity_response(freqs, s_average, initial_params):
         [np.inf, np.inf, max(freqs_peak)]  # Upper bounds
     )
     
-    # Calculate weights within peak region for better center fitting
-    weights_preliminary = calculate_fit_weights(freqs_peak, initial_resonance_freq, peak_width)
-    sigma_preliminary = 1.0 / np.sqrt(weights_preliminary + 1e-10)
-    
+    # Preliminary fit WITHOUT weights, only on peak region data
     try:
         popt_preliminary, _ = sp.optimize.curve_fit(
             cavity_model, freqs_peak, s_peak, 
-            p0=p0, bounds=bounds, 
-            sigma=sigma_preliminary, absolute_sigma=False,
+            p0=p0, bounds=bounds,
             maxfev=1000000,
             ftol=1e-12,
             xtol=1e-12
@@ -156,18 +152,14 @@ def fit_cavity_response(freqs, s_average, initial_params):
         [0, 0, min(freqs_peak_final)],
         [np.inf, np.inf, max(freqs_peak_final)]
     )
-    
-    # Calculate weights centered on refined peak position
-    weights_final = calculate_fit_weights(freqs_peak_final, refined_resonance_freq, peak_width)
-    sigma_final = 1.0 / np.sqrt(weights_final + 1e-10)
 
     # Use preliminary fit results as starting point for final fit
     p0_final = popt_preliminary
 
-    # High-precision fitting on peak region only
+    # High-precision fitting on peak region only, WITHOUT weights
     popt, _ = sp.optimize.curve_fit(
         cavity_model, freqs_peak_final, s_peak_final, 
-        p0=p0_final, bounds=bounds_final, sigma=sigma_final, absolute_sigma=False, 
+        p0=p0_final, bounds=bounds_final,
         maxfev=10000000,  # Increase max function evaluations
         ftol=1e-15,       # Function tolerance
         xtol=1e-15,       # Parameter tolerance
@@ -368,8 +360,7 @@ class EResonatorExtractor(Executor):
             fit_params["resonance_freq"])
         
         # Add plateau and convert to dB
-        fit_curve = convert_linear_to_dB(
-            convert_dB_to_linear(fit_params["plato"]) + model_response)
+        fit_curve = convert_linear_to_dB(model_response)
 
         # Use fitted resonance frequency for visualization if fitting was performed
         display_resonance_freq = fit_params["resonance_freq"] if fitted else resonance_freq
