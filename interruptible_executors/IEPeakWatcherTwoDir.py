@@ -2,7 +2,7 @@ from executors import ECut, EPeakParams, ETrajectories
 
 from .IEPeakWatcher import IEPeakWatcher
 
-
+###LEGACY: IEPeakWatcherTwoDir - для двух траекторий с жестким направлением. Сейчас не используется, но может пригодиться для сравнения с IEPeakWatcher.
 class IEPeakWatcherTwoDir(IEPeakWatcher):
     """
     IEPeakWatcher with exactly two trajectories:

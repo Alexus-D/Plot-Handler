@@ -38,7 +38,7 @@ data = make_step(data, executors.EFilter, "Filter Step")
 
 result = make_step(
     data,
-    interruptible_executors.IEPeakWatcherTwoDir,
+    interruptible_executors.IEPeakWatcher,
     "Peak Watcher",
     save_figure_path=os.path.join(result_path, "peak_watcher_figure.png")
 )
