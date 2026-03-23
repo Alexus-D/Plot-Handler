@@ -49,22 +49,29 @@ def simple_anticrossing_model(freqs, fields, params):
     freq (np.ndarray): Frequency array.
     field (np.ndarray): Magnetic field array.
     params (dict): Dictionary containing model parameters:
-        - 'kappa': Cavity decay rate.
-        - 'beta': Magnon decay rate.
-        - 'resonance_freq': Resonance frequency of the cavity.
-        - 'J': Coupling strength.
-        - 'gamma': Additional decay rate.
-        - 'magnon_freq': Array of magnon frequencies corresponding to the fields.
         - 'alpha': Array of magnon damping rates corresponding to the fields.
+        - 'beta': Magnon decay rate.
+        - 'kappa': Cavity decay rate.
+        - 'gamma': Additional decay rate.
+        - 'J': Coupling strength.
+        - 'magnon_freq_slope': Magnon dispersion slope (GHz/Oe).
+        - 'magnon_freq_intercept': Magnon dispersion intercept (GHz).
+        - 'resonance_freq': Resonance frequency of the cavity.
 
     Returns:
     np.ndarray: Computed response based on the anticrossing model.
     """
-    kappa = params["kappa"]
+    alpha = params["alpha"]
     beta = params["beta"]
+    kappa = params["kappa"]
+    gamma = params["gamma"]
+    J = params["J"]
+    G = kappa * gamma
     resonance_freq = params["resonance_freq"]
+    magnon_slope = params["magnon_freq_slope"]
+    magnon_intercept = params["magnon_freq_intercept"]
 
-    magnon_freqs = params['magnon_freq']
+    magnon_freqs = magnon_slope * fields + magnon_intercept
 
     if len(fields) != len(magnon_freqs):
         raise ValueError("Length of field array must match length of magnon_freq array")
@@ -76,7 +83,7 @@ def simple_anticrossing_model(freqs, fields, params):
         gamma = params['gamma'][i]
         J = params['J'][i]
         Gamma =kappa * gamma
-        magnon_freq = params['magnon_freq'][i]
+        magnon_freq = magnon_freqs[i]
         coupling = 1j * J + Gamma
 
         cavity_term = 1j * (freqs - resonance_freq) - (kappa + beta)
@@ -85,7 +92,5 @@ def simple_anticrossing_model(freqs, fields, params):
         denominator = cavity_term  - coupling**2 / magnon_term
 
         linear_response[i, :] = 1 + kappa / denominator
-
-    response_dB = ut.convert_linear_to_dB(np.abs(linear_response))
     
-    return response_dB
+    return linear_response

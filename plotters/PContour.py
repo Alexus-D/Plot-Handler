@@ -14,16 +14,20 @@ class PContour(Plotter):
         if x is None or y is None or z is None:
             raise ValueError("plot_data must contain 'x', 'y', and 'z' keys.")
 
-        X, Y = np.meshgrid(x, y)
-        Z = np.array(z).transpose()
+        # Our data convention: z has shape (len(x), len(y))
+        # matplotlib contourf expects: if using meshgrid default (xy indexing),
+        # then z should have shape (len(y), len(x))
+        X, Y = np.meshgrid(x, y)  # Shape: (len(y), len(x))
+        Z = np.array(z).T  # Transpose to match: (len(x), len(y)) -> (len(y), len(x))
 
         self.figure, ax = plt.subplots()
         contour = ax.contourf(X, Y, Z, cmap='viridis', levels=25)
         cbar = plt.colorbar(contour)
-        cbar.set_label(self.plot_data.get("zlabel", "Z-axis"))
-        ax.set_title(self.plot_data.get("title", "Contour Plot"))
-        ax.set_xlabel(self.plot_data.get("xlabel", "X-axis"))
-        ax.set_ylabel(self.plot_data.get("ylabel", "Y-axis"))
+        cbar.set_label(self.plot_data.get("zlabel", "Z-axis"), fontsize=10)
+        ax.set_title(self.plot_data.get("title", "Contour Plot"), fontsize=11)
+        ax.set_xlabel(self.plot_data.get("xlabel", "X-axis"), fontsize=10)
+        ax.set_ylabel(self.plot_data.get("ylabel", "Y-axis"), fontsize=10)
+        ax.tick_params(labelsize=9)
 
         return self.figure
     

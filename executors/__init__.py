@@ -10,6 +10,8 @@ from .ESParamsReconstructor import ESParamsReconstructor
 from .EOwnModesBuilder import EOwnModesBuilder
 from .ELorentzianApproximator import ELorentzianApproximator
 from .EMagnonFreqCalibrator import EMagnonFreqCalibrator
+from .ETotalApproximator import ETotalApproximator
+from .EAnticrossingApproximator import EAnticrossingApproximator
 
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
 	"EOwnModesBuilder",
 	"ELorentzianApproximator",
 	"EMagnonFreqCalibrator",
+	"ETotalApproximator",
+    "EAnticrossingApproximator"
 ]

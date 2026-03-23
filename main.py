@@ -5,7 +5,7 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_next_numbered_directory, save_with_loader
 
 
-data_path = "data/2026_02_calibrated_stripline_with_film/CoherentS12.txt"
+data_path = "data/2026_02_calibrated_stripline_with_film/somethingS12.txt"
 result_path = data_path.replace("data", "results").rsplit(".", 1)[0]
 # result_path = os.path.join('results', os.path.basename(data_path).split('.')[0])
 result_path = make_next_numbered_directory(result_path)
@@ -42,6 +42,18 @@ data.update(magnon_calib_data)
 
 
 data = make_step(data, executors.EFilter, "Filter Step")
+
+# Global 2D fit - choose approximator:
+# executors.ETotalApproximator - coupled-resonator model (fits: g, kappa_m, gamma_tot)
+# executors.EAnticrossingApproximator - anticrossing model (fits: J, alpha, gamma)
+total_fit_result = make_step(data, executors.EAnticrossingApproximator, "Anticrossing Approximation")
+data_params = {
+    "result_path": os.path.join(result_path, "total_approximator_result.txt")
+}
+# Universal loader - works with any 2D approximator
+save_with_loader(loaders.Load2DApproximator, data_params, total_fit_result)
+loaders.Load2DApproximator(data_params).plot_and_save(total_fit_result, plots_dir=result_path)
+data.update(total_fit_result)
 
 # result = make_step(
 #     data,
