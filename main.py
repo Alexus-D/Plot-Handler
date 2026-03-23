@@ -26,12 +26,12 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
-# resonator_data = make_step(data, executors.EResonatorExtractor, "Resonator Data Extraction")
-# data_params = {
-#     "result_path": os.path.join(result_path, "resonator_extractor_result.txt")
-# }
-# save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
-# data.update(resonator_data)
+resonator_data = make_step(data, executors.EResonatorExtractor, "Resonator Data Extraction")
+data_params = {
+    "result_path": os.path.join(result_path, "resonator_extractor_result.txt")
+}
+save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
+data.update(resonator_data)
 
 
 data = make_step(data, executors.EFilter, "Filter Step")
@@ -47,6 +47,21 @@ data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.t
 save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
 
 data.update(result)
+
+lorentz_result = make_step(
+    data,
+    interruptible_executors.IELorentzianApproximator,
+    "Lorentzian Approximator",
+    save_figure_path=os.path.join(result_path, "lorentzian_approximator_figure.png"),
+)
+
+data_params["result_path"] = os.path.join(result_path, "ie_lorentzian_approximator_result.txt")
+save_with_loader(loaders.LoadIELorentzianApproximator, data_params, lorentz_result)
+loaders.LoadIELorentzianApproximator(data_params).plot_and_save(
+    lorentz_result, plots_dir=result_path
+)
+
+data.update(lorentz_result)
 
 # # Build own_modes from trajectories for coupling extraction
 # own_modes_result = make_step(data, executors.EOwnModesBuilder, "Own Modes Builder")

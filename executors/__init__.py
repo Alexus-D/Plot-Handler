@@ -8,6 +8,7 @@ from .EResonatorExtractor import EResonatorExtractor
 from .ECouplingExtractor import ECouplingExtractor
 from .ESParamsReconstructor import ESParamsReconstructor
 from .EOwnModesBuilder import EOwnModesBuilder
+from .ELorentzianApproximator import ELorentzianApproximator
 
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
 	"ECouplingExtractor",
 	"ESParamsReconstructor",
 	"EOwnModesBuilder",
+	"ELorentzianApproximator",
 ]
