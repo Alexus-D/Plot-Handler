@@ -9,6 +9,7 @@ from .ECouplingExtractor import ECouplingExtractor
 from .ESParamsReconstructor import ESParamsReconstructor
 from .EOwnModesBuilder import EOwnModesBuilder
 from .ELorentzianApproximator import ELorentzianApproximator
+from .EMagnonFreqCalibrator import EMagnonFreqCalibrator
 
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
 	"ESParamsReconstructor",
 	"EOwnModesBuilder",
 	"ELorentzianApproximator",
+	"EMagnonFreqCalibrator",
 ]

@@ -33,35 +33,42 @@ data_params = {
 save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
 data.update(resonator_data)
 
+magnon_calib_data = make_step(data, executors.EMagnonFreqCalibrator, "Magnon Frequency Calibration")
+data_params = {
+    "result_path": os.path.join(result_path, "magnon_freq_calibrator_result.txt")
+}
+save_with_loader(loaders.LoadEMagnonFreqCalibrator, data_params, magnon_calib_data)
+data.update(magnon_calib_data)
+
 
 data = make_step(data, executors.EFilter, "Filter Step")
 
-result = make_step(
-    data,
-    interruptible_executors.IEPeakWatcherPolyline,
-    "Peak Watcher",
-    save_figure_path=os.path.join(result_path, "peak_watcher_figure.png")
-)
+# result = make_step(
+#     data,
+#     interruptible_executors.IEPeakWatcherPolyline,
+#     "Peak Watcher",
+#     save_figure_path=os.path.join(result_path, "peak_watcher_figure.png")
+# )
 
-data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.txt")
-save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
+# data_params["result_path"] = os.path.join(result_path, "ie_peak_watcher_result.txt")
+# save_with_loader(loaders.LoadIEPeakWatcher, data_params, result)
 
-data.update(result)
+# data.update(result)
 
-lorentz_result = make_step(
-    data,
-    interruptible_executors.IELorentzianApproximator,
-    "Lorentzian Approximator",
-    save_figure_path=os.path.join(result_path, "lorentzian_approximator_figure.png"),
-)
+# lorentz_result = make_step(
+#     data,
+#     interruptible_executors.IELorentzianApproximator,
+#     "Lorentzian Approximator",
+#     save_figure_path=os.path.join(result_path, "lorentzian_approximator_figure.png"),
+# )
 
-data_params["result_path"] = os.path.join(result_path, "ie_lorentzian_approximator_result.txt")
-save_with_loader(loaders.LoadIELorentzianApproximator, data_params, lorentz_result)
-loaders.LoadIELorentzianApproximator(data_params).plot_and_save(
-    lorentz_result, plots_dir=result_path
-)
+# data_params["result_path"] = os.path.join(result_path, "ie_lorentzian_approximator_result.txt")
+# save_with_loader(loaders.LoadIELorentzianApproximator, data_params, lorentz_result)
+# loaders.LoadIELorentzianApproximator(data_params).plot_and_save(
+#     lorentz_result, plots_dir=result_path
+# )
 
-data.update(lorentz_result)
+# data.update(lorentz_result)
 
 # # Build own_modes from trajectories for coupling extraction
 # own_modes_result = make_step(data, executors.EOwnModesBuilder, "Own Modes Builder")

@@ -4,5 +4,6 @@ from .SNPoints import SNPoints
 from .SPeakParams import SPeakParams
 from .SPeakTrajectories import SPeakTrajectories
 from .SPeakTrajectoriesPolyline import SPeakTrajectoriesPolyline
+from .STwoPointsCalibration import STwoPointsCalibration
 
-__all__ = ["Selector", "SFreq", "SNPoints", "SPeakParams", "SPeakTrajectories", "SPeakTrajectoriesPolyline"]
+__all__ = ["Selector", "SFreq", "SNPoints", "SPeakParams", "SPeakTrajectories", "SPeakTrajectoriesPolyline", "STwoPointsCalibration"]

@@ -4,6 +4,7 @@ from .LoadIEPeakWatcher import LoadIEPeakWatcher
 from .LoadIEPeakApproximator import LoadIEPeakApproximator
 from .LoadIELorentzianApproximator import LoadIELorentzianApproximator
 from .LoadEResonatorExtractor import LoadEResonatorExtractor
+from .LoadEMagnonFreqCalibrator import LoadEMagnonFreqCalibrator
 from .LoadECouplingExtractor import LoadECouplingExtractor
 from .LoadESParamsReconstructor import LoadESParamsReconstructor
 from .LoadEOwnModesBuilder import LoadEOwnModesBuilder
@@ -16,6 +17,7 @@ __all__ = [
 	"LoadIEPeakApproximator",
 	"LoadIELorentzianApproximator",
 	"LoadEResonatorExtractor",
+	"LoadEMagnonFreqCalibrator",
 	"LoadECouplingExtractor",
 	"LoadESParamsReconstructor",
 	"LoadEOwnModesBuilder",
