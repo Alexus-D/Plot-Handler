@@ -83,7 +83,12 @@ class PTotalApproximatorComparison(Plotter):
         # Add fitted parameters to title if available
         title_fit = "Fitted Data"
         if fitted_params:
-            param_str = ", ".join([f"{k}={v:.4f}" for k, v in sorted(fitted_params.items())])
+            # Format parameters in MHz (GHz * 1000) in exponential notation
+            param_strs = []
+            for k, v in sorted(fitted_params.items()):
+                v_mhz = v * 1000  # Convert GHz to MHz
+                param_strs.append(f"{k}={v_mhz:.2e} MHz")
+            param_str = ", ".join(param_strs)
             title_fit += f"\n{param_str}"
         axes[1].set_title(title_fit, fontsize=10)
         

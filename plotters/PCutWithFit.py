@@ -93,4 +93,26 @@ class PCutResonatorFit(PCutWithFit):
             # Refresh legend to include new elements
             ax.legend()
         
+        # Add fitted resonator parameters to the plot if available
+        fitted_params = {}
+        exclude_keys = {"x", "y", "fit_curve", "title", "xlabel", "ylabel", 
+                       "resonance_freq", "peak_width"}
+        
+        for k, v in self.plot_data.items():
+            if k not in exclude_keys and isinstance(v, (int, float)):
+                fitted_params[k] = v
+        
+        if fitted_params:
+            # Format parameters in MHz in exponential notation
+            param_strs = []
+            for k, v in sorted(fitted_params.items()):
+                v_mhz = v * 1000  # Convert GHz to MHz
+                param_strs.append(f"{k}={v_mhz:.2e} MHz")
+            
+            param_text = "\n".join(param_strs)
+            # Add text box with parameters
+            ax.text(0.02, 0.98, param_text, transform=ax.transAxes,
+                   fontsize=9, verticalalignment='top',
+                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        
         return self.figure

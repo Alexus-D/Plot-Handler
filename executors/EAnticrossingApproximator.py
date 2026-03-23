@@ -181,10 +181,14 @@ class EAnticrossingApproximator(Executor):
             alpha_fit = alpha_init
             gamma_fit = gamma_init
 
+        # Compute Gamma = sqrt(kappa * gamma)
+        Gamma_fit = np.sqrt(kappa * gamma_fit)
+        
         print(f"[EAnticrossingApproximator] Fit complete:")
         print(f"  J = {J_fit:.6f} GHz")
         print(f"  alpha = {alpha_fit:.6f} GHz")
         print(f"  gamma = {gamma_fit:.6f} GHz")
+        print(f"  Gamma = {Gamma_fit:.6f} GHz")
 
         # Compute reconstructed data for visualization
         n_fields = len(fields)
@@ -207,6 +211,7 @@ class EAnticrossingApproximator(Executor):
             "J":                   J_fit,
             "alpha":               alpha_fit,
             "gamma":               gamma_fit,
+            "Gamma":               Gamma_fit,
             "kappa":               kappa,
             "beta":                beta,
             "resonance_freq":      resonance_freq,

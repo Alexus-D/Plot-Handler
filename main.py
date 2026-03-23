@@ -5,18 +5,20 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_next_numbered_directory, save_with_loader
 
 
-data_path = "data/2026_02_calibrated_stripline_with_film/somethingS12.txt"
+data_path = "data/mease2026.txt"
 result_path = data_path.replace("data", "results").rsplit(".", 1)[0]
 # result_path = os.path.join('results', os.path.basename(data_path).split('.')[0])
 result_path = make_next_numbered_directory(result_path)
 
+plot_type = "S11" if "S11" in data_path else "S21" if "S21" in data_path else "S12" if "S12" in data_path else "S22" if "S22" in data_path else "Unknown"
+title = data_path.split("data/")[-1].split(".txt")[0]
 data_params = {
     "data_path": data_path,
     "result_path": result_path,
     "xlabel": "Fields (Oe)",
     "ylabel": "Frequency (GHz)",
-    "zlabel": "S11 (dB)",
-    "title": "S11 Contour Plot",
+    "zlabel": f"{plot_type} (dB)",
+    "title": title,
     "unit": "dB"
 }
 
