@@ -123,7 +123,7 @@ class EAnticrossingApproximator(Executor):
         p0 = [J_init, alpha_init, gamma_init]
 
         # Bounds: all three parameters must be positive
-        bounds = ([0, 0, 0], [np.inf, np.inf, np.inf])
+        bounds = self._get_fit_bounds()
 
         # Define the model as a function that returns flattened output
         def model_flat(dummy, J, alpha, gamma):
@@ -322,6 +322,10 @@ class EAnticrossingApproximator(Executor):
         print(f"  gamma_init = {self.initial_params['gamma_init']:.4f}")
         if "polygon_mask" in self.initial_params:
             print(f"  Polygon mask: {np.sum(self.initial_params['polygon_mask'])} points selected")
+
+    def _get_fit_bounds(self):
+        """Return (lower_bounds, upper_bounds) for curve_fit. Override in subclasses for custom bounds."""
+        return ([0, 0, 0], [np.inf, np.inf, np.inf])
 
     def prepare_for_visualization(self):
         """Creates 3-panel comparison plot."""

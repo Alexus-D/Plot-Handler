@@ -12,6 +12,7 @@ from .ELorentzianApproximator import ELorentzianApproximator
 from .EMagnonFreqCalibrator import EMagnonFreqCalibrator
 from .ETotalApproximator import ETotalApproximator
 from .EAnticrossingApproximator import EAnticrossingApproximator
+from .EBorderAApproximator import EBorderAApproximator
 
 
 __all__ = [
@@ -28,5 +29,6 @@ __all__ = [
 	"ELorentzianApproximator",
 	"EMagnonFreqCalibrator",
 	"ETotalApproximator",
-    "EAnticrossingApproximator"
+    "EAnticrossingApproximator",
+    "EBorderAApproximator",
 ]

@@ -5,7 +5,7 @@ import loaders, executors, interruptible_executors
 from sugar import make_step, make_next_numbered_directory, save_with_loader
 
 
-data_path = "data/mease2026.txt"
+data_path = "data/2026_04_CrestWithGap/IsolationS12.txt"
 result_path = data_path.replace("data", "results").rsplit(".", 1)[0]
 # result_path = os.path.join('results', os.path.basename(data_path).split('.')[0])
 result_path = make_next_numbered_directory(result_path)
@@ -28,12 +28,16 @@ loader = loaders.LoadContourTXT(data_params)
 
 data = loader.load_data()
 
+data = make_step(data, executors.EFilter, "Filter Step")
+
 resonator_data = make_step(data, executors.EResonatorExtractor, "Resonator Data Extraction")
 data_params = {
     "result_path": os.path.join(result_path, "resonator_extractor_result.txt")
 }
 save_with_loader(loaders.LoadEResonatorExtractor, data_params, resonator_data)
 data.update(resonator_data)
+
+data = make_step(data, executors.EFilter, "Filter Step")
 
 magnon_calib_data = make_step(data, executors.EMagnonFreqCalibrator, "Magnon Frequency Calibration")
 data_params = {
@@ -43,12 +47,11 @@ save_with_loader(loaders.LoadEMagnonFreqCalibrator, data_params, magnon_calib_da
 data.update(magnon_calib_data)
 
 
-data = make_step(data, executors.EFilter, "Filter Step")
-
 # Global 2D fit - choose approximator:
-# executors.ETotalApproximator - coupled-resonator model (fits: g, kappa_m, gamma_tot)
-# executors.EAnticrossingApproximator - anticrossing model (fits: J, alpha, gamma)
-total_fit_result = make_step(data, executors.EAnticrossingApproximator, "Anticrossing Approximation")
+# executors.ETotalApproximator         - coupled-resonator model (fits: g, kappa_m, gamma_tot)
+# executors.EAnticrossingApproximator  - anticrossing model (fits: J, alpha, gamma)
+# executors.EBorderAApproximator       - same as above but with user-defined fitting bounds
+total_fit_result = make_step(data, executors.EBorderAApproximator, "Anticrossing Approximation")
 data_params = {
     "result_path": os.path.join(result_path, "total_approximator_result.txt")
 }
